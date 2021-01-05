@@ -1,5 +1,7 @@
 package episim;
 
+import episim.controller.HomeController;
+import episim.controller.MainLayoutController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -15,8 +17,9 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/episim/view/Home.fxml"));
-        var scene = new Scene(root);
+        FXMLLoader mainLayoutLoader = new FXMLLoader(getClass().getResource("/episim/view/MainLayout.fxml"));
+        var scene = new Scene(mainLayoutLoader.load());
+        MainLayoutController mainLayout = mainLayoutLoader.getController();
 
         // Apply metro theme
         JMetro jMetro = new JMetro(Style.LIGHT);
@@ -25,6 +28,11 @@ public class App extends Application {
         primaryStage.setTitle("Epidemic Simulator");
         primaryStage.setScene(scene);
         primaryStage.show();
+
+        FXMLLoader homeLoader = new FXMLLoader(getClass().getResource("/episim/view/Home.fxml"));
+        mainLayout.setContent(homeLoader.load());
+
+        HomeController home = homeLoader.getController();
     }
 
     public static void main(String[] args) {

@@ -1,0 +1,10 @@
+{
+    "gradle.javaDebug": {
+        "tasks": [
+            "run",
+            "test",
+            "subproject:customJavaExecTask"
+        ],
+        "clean": true
+    },
+}

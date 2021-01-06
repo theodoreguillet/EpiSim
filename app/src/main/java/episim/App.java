@@ -33,6 +33,7 @@ public class App extends Application {
         mainLayout.setContent(homeLoader.load());
 
         HomeController home = homeLoader.getController();
+        home.initialize();
     }
 
     public static void main(String[] args) {

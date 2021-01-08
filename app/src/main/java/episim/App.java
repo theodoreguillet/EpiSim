@@ -1,25 +1,30 @@
 package episim;
 
-import episim.controller.HomeController;
-import episim.controller.MainLayoutController;
-import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
+import com.google.inject.AbstractModule;
+import com.google.inject.Module;
+import com.google.inject.Scopes;
+import com.google.inject.name.Names;
+import de.saxsys.mvvmfx.FluentViewLoader;
+import de.saxsys.mvvmfx.guice.MvvmfxGuiceApplication;
+import episim.core.SimulationConfig;
+import episim.view.MainView;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import jfxtras.styles.jmetro.JMetro;
 import jfxtras.styles.jmetro.Style;
 
-public class App extends Application {
+import java.util.List;
+
+public class App extends MvvmfxGuiceApplication {
     public String getGreeting() {
         return "Hello World!";
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        FXMLLoader mainLayoutLoader = new FXMLLoader(getClass().getResource("/episim/view/MainLayout.fxml"));
-        var scene = new Scene(mainLayoutLoader.load());
-        MainLayoutController mainLayout = mainLayoutLoader.getController();
+    public void startMvvmfx(Stage primaryStage) throws Exception {
+        Parent parent = FluentViewLoader.fxmlView(MainView.class).load().getView();
+        var scene = new Scene(parent);
 
         // Apply metro theme
         JMetro jMetro = new JMetro(Style.LIGHT);
@@ -28,17 +33,9 @@ public class App extends Application {
         primaryStage.setTitle("Epidemic Simulator");
         primaryStage.setScene(scene);
         primaryStage.show();
-
-        FXMLLoader homeLoader = new FXMLLoader(getClass().getResource("/episim/view/Home.fxml"));
-        mainLayout.setContent(homeLoader.load());
-
-        HomeController home = homeLoader.getController();
-        home.initialize();
     }
 
     public static void main(String[] args) {
-        // var frame = new MainFrame();
         launch(args);
-        System.out.println(new App().getGreeting());
     }
 }

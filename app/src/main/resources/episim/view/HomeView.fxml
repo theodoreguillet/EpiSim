@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.String?>
+<?import javafx.collections.FXCollections?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Group?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<BorderPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="episim.view.HomeView">
+   <center>
+      <SplitPane dividerPositions="0.7" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+        <items>
+            <SplitPane centerShape="false" dividerPositions="0.5" orientation="VERTICAL">
+              <items>
+                  <LineChart>
+                    <xAxis>
+                      <CategoryAxis side="BOTTOM" />
+                    </xAxis>
+                    <yAxis>
+                      <NumberAxis autoRanging="false" minorTickCount="1" minorTickLength="3.0" side="LEFT" tickLabelGap="1.0" tickLength="5.0" tickUnit="0.5" upperBound="1.0" />
+                    </yAxis>
+                  </LineChart>
+                  <VBox spacing="20.0">
+                     <children>
+                        <VBox spacing="5.0">
+                           <children>
+                              <ScrollPane fitToHeight="true" fitToWidth="true" minHeight="-Infinity" prefHeight="80.0" vbarPolicy="NEVER">
+                                 <content>
+                                    <HBox alignment="CENTER" fillHeight="false" minHeight="-Infinity" prefHeight="50.0">
+                                       <children>
+                                          <Group>
+                                             <children>
+                                                <StackPane minHeight="-Infinity">
+                                                   <children>
+                                                      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="30.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
+                                                      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="S">
+                                                         <font>
+                                                            <Font size="14.0" />
+                                                         </font>
+                                                      </Text>
+                                                   </children>
+                                                </StackPane>
+                                                <Line endX="20.0" layoutX="30.39999771118164" layoutY="14.400001525878906" />
+                                                <Spinner editable="true" layoutX="51.999996185302734" layoutY="1.6000003814697266" minWidth="-Infinity" prefWidth="70.0" />
+                                                <Line endX="20.0" layoutX="122.40000534057617" layoutY="14.400001525878906" />
+                                             </children>
+                                          </Group>
+                                          <HBox>
+                                             <children>
+                                                <Group>
+                                                   <children>
+                                                      <StackPane minHeight="-Infinity">
+                                                         <children>
+                                                            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="30.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
+                                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="E">
+                                                               <font>
+                                                                  <Font size="14.0" />
+                                                               </font>
+                                                            </Text>
+                                                         </children>
+                                                      </StackPane>
+                                                      <Line endX="20.0" layoutX="30.39999771118164" layoutY="14.400001525878906" />
+                                                      <Spinner editable="true" layoutX="51.999996185302734" layoutY="1.6000003814697266" minWidth="-Infinity" prefWidth="70.0" />
+                                                      <Line endX="20.0" layoutX="122.40000534057617" layoutY="14.400001525878906" />
+                                                   </children>
+                                                </Group>
+                                                <Group>
+                                                   <children>
+                                                      <StackPane minHeight="-Infinity">
+                                                         <children>
+                                                            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="30.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
+                                                            <Text strokeType="OUTSIDE" strokeWidth="0.0" text="I">
+                                                               <font>
+                                                                  <Font size="14.0" />
+                                                               </font>
+                                                            </Text>
+                                                         </children>
+                                                      </StackPane>
+                                                      <Line endX="20.0" layoutX="30.39999771118164" layoutY="14.400001525878906" />
+                                                      <Spinner editable="true" layoutX="51.999996185302734" layoutY="1.6000003814697266" minWidth="-Infinity" prefWidth="70.0" />
+                                                      <Line endX="20.0" layoutX="122.40000534057617" layoutY="14.400001525878906" />
+                                                   </children>
+                                                </Group>
+                                             </children>
+                                          </HBox>
+                                          <StackPane>
+                                             <children>
+                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="30.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
+                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="R">
+                                                   <font>
+                                                      <Font size="14.0" />
+                                                   </font>
+                                                </Text>
+                                             </children>
+                                          </StackPane>
+                                       </children>
+                                    </HBox>
+                                 </content>
+                                 <VBox.margin>
+                                    <Insets />
+                                 </VBox.margin>
+                              </ScrollPane>
+                           </children>
+                        </VBox>
+                        <VBox spacing="5.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Taille de la population" />
+                              <BorderPane>
+                                 <center>
+                                    <Slider />
+                                 </center>
+                                 <left>
+                                    <Spinner editable="true" prefWidth="70.0" BorderPane.alignment="CENTER">
+                                       <BorderPane.margin>
+                                          <Insets right="10.0" />
+                                       </BorderPane.margin>
+                                    </Spinner>
+                                 </left>
+                              </BorderPane>
+                           </children>
+                        </VBox>
+                        <VBox layoutX="30.0" layoutY="30.0" spacing="5.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Pourcentage initialement infecté" />
+                              <BorderPane>
+                                 <center>
+                                    <Slider />
+                                 </center>
+                                 <left>
+                                    <Spinner editable="true" prefWidth="70.0" BorderPane.alignment="CENTER">
+                                       <BorderPane.margin>
+                                          <Insets right="10.0" />
+                                       </BorderPane.margin>
+                                    </Spinner>
+                                 </left>
+                              </BorderPane>
+                           </children>
+                        </VBox>
+                     </children>
+                     <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                     </padding>
+                  </VBox>
+              </items>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </SplitPane>
+            <VBox fillWidth="false" spacing="20.0">
+               <children>
+                  <ChoiceBox prefWidth="150.0" value="Spatialisation simple">
+                     <items>
+                        <FXCollections fx:factory="observableArrayList">
+                           <String fx:value="Sans spatialisation" />
+                           <String fx:value="Spatialisation simple" />
+                           <String fx:value="Spatialisation zones" />
+                        </FXCollections>
+                     </items>
+                  </ChoiceBox>
+                  <CheckBox mnemonicParsing="false" text="Confinement" />
+                  <CheckBox mnemonicParsing="false" text="Port du masque" />
+                  <CheckBox mnemonicParsing="false" text="Quarantaine" />
+                  <CheckBox mnemonicParsing="false" text="Distanciation sociale" />
+               </children>
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </padding>
+            </VBox>
+        </items>
+      </SplitPane>
+   </center>
+   <top>
+      <VBox prefWidth="100.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="TOP_RIGHT" prefWidth="600.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#onStartSimulationAction" text="Démarrer la simulation" />
+               </children>
+               <padding>
+                  <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+               </padding>
+            </HBox>
+            <ScrollPane fitToHeight="true" fitToWidth="true" minHeight="-Infinity" prefHeight="100.0" vbarPolicy="NEVER">
+               <content>
+                  <HBox alignment="CENTER" minWidth="-Infinity" spacing="20.0">
+                     <children>
+                        <ToggleButton mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" selected="true" text="SIR" textAlignment="CENTER" wrapText="true">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="epiModelGroup" />
+                           </toggleGroup>
+                        </ToggleButton>
+                        <ToggleButton layoutX="20.0" layoutY="21.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" text="SEIR" textAlignment="CENTER" toggleGroup="$epiModelGroup" wrapText="true" />
+                        <ToggleButton layoutX="500.0" layoutY="21.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" text="SEIR evolutive" textAlignment="CENTER" toggleGroup="$epiModelGroup" wrapText="true" />
+                        <Button mnemonicParsing="false" style="-fx-background-radius: 5em; -fx-border-radius: 5em;" text="+">
+                           <HBox.margin>
+                              <Insets left="10.0" />
+                           </HBox.margin>
+                        </Button>
+                     </children>
+                     <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                     </padding>
+                  </HBox>
+               </content>
+            </ScrollPane>
+         </children>
+      </VBox>
+   </top>
+</BorderPane>

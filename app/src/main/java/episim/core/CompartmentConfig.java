@@ -24,6 +24,11 @@ public class CompartmentConfig implements Serializable, Cloneable {
         this.name = "";
         this.color = "#000000";
     }
+    public CompartmentConfig(double param, String name, String color) {
+        this.param = param;
+        this.name = name;
+        this.color = color;
+    }
 
     /**
      * Crée et retourne une copie profonde de cet objet

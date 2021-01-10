@@ -9,6 +9,9 @@ import javafx.scene.layout.BorderPane;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Vue principale, contient les autres vues
+ */
 public class MainView implements FxmlView<MainViewModel>, Initializable {
     @InjectViewModel
     private MainViewModel viewModel;

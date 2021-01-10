@@ -8,10 +8,12 @@ public class ConfigurationScope implements Scope {
     public static final String SIMULATION = "SIMULATION";
     public static final String MAIN_CONFIG = "MAIN_CONFIG";
 
-    @Inject
-    private SimulationConfig simulationConfig;
+    private SimulationConfig simulationConfig = SimulationConfig.getDefault();
 
     public SimulationConfig getSimulationConfig() {
         return simulationConfig;
+    }
+    public void setSimulationConfig(SimulationConfig simulationConfig) {
+        this.simulationConfig = simulationConfig;
     }
 }

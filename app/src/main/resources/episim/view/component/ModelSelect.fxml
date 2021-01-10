@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<HBox xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="episim.view.component.ModelSelect">
+    <ToggleButton fx:id="toggle" mnemonicParsing="false" prefHeight="50.0" prefWidth="100.0" text="SIR" textAlignment="CENTER" wrapText="true" />
+   <BorderPane fx:id="editPane" minHeight="-Infinity" minWidth="-Infinity" nodeOrientation="LEFT_TO_RIGHT">
+      <top>
+         <Button fx:id="editBtn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+      </top>
+      <bottom>
+         <Button fx:id="removeBtn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" BorderPane.alignment="CENTER" />
+      </bottom>
+      <HBox.margin>
+         <Insets />
+      </HBox.margin>
+      <padding>
+         <Insets left="5.0" />
+      </padding>
+   </BorderPane>
+</HBox>

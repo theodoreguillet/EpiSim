@@ -18,10 +18,26 @@ public class ModelConfig implements Serializable, Cloneable {
      * Nom du modèle épidémique
      */
     private String name;
+    /**
+     * Facteur de naissance
+     */
+    private double birth;
+    /**
+     * Facteur de décès (naturel)
+     */
+    private double death;
 
     public ModelConfig() {
         this.compartments = new ArrayList<>();
         this.name = "";
+        this.birth = 0;
+        this.death = 0;
+    }
+    public ModelConfig(ArrayList<CompartmentConfig> compartments, String name, double birth, double death) {
+        this.compartments = compartments;
+        this.name = name;
+        this.birth = birth;
+        this.death = death;
     }
 
     /**
@@ -59,11 +75,31 @@ public class ModelConfig implements Serializable, Cloneable {
         this.compartments.remove(index);
     }
 
+    public void clearCompartments() {
+        this.compartments.clear();
+    }
+
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public double getBirth() {
+        return birth;
+    }
+
+    public void setBirth(double birth) {
+        this.birth = birth;
+    }
+
+    public double getDeath() {
+        return death;
+    }
+
+    public void setDeath(double death) {
+        this.death = death;
     }
 }

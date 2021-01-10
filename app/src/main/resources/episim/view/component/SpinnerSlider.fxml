@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.BorderPane?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="episim.view.component.SpinnerSlider">
+    <center>
+        <Slider fx:id="slider" />
+    </center>
+    <left>
+        <Spinner fx:id="spinner" editable="true" prefWidth="70.0" BorderPane.alignment="CENTER">
+            <BorderPane.margin>
+                <Insets right="10.0" />
+            </BorderPane.margin>
+        </Spinner>
+    </left>
+</BorderPane>

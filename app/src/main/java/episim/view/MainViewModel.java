@@ -4,6 +4,9 @@ import de.saxsys.mvvmfx.InjectScope;
 import de.saxsys.mvvmfx.ScopeProvider;
 import de.saxsys.mvvmfx.ViewModel;
 
+/**
+ * Modèle de la vue principale
+ */
 @ScopeProvider(scopes = {ConfigurationScope.class})
 public class MainViewModel implements ViewModel {
     public static final String ACTION_SET_CONTENT = "ACTION_SET_CONTENT";

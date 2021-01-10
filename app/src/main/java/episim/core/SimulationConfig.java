@@ -1,10 +1,7 @@
 package episim.core;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Configuration de la simulation d'épidémie
@@ -14,11 +11,24 @@ public class SimulationConfig {
      * Les modèles épidémiques
      */
     private ArrayList<ModelConfig> models;
-
-    public final String uuid = UUID.randomUUID().toString();
+    /**
+     * La taille de la population
+     */
+    private int populationSize;
+    /**
+     * Proportion de la population initialement infectée
+     */
+    private double initialInfectious;
 
     SimulationConfig() {
         this.models = new ArrayList<>();
+        this.populationSize = 0;
+        this.initialInfectious = 0;
+    }
+    SimulationConfig(ArrayList<ModelConfig> models, int populationSize, double initialInfectious) {
+        this.models = models;
+        this.populationSize = populationSize;
+        this.initialInfectious = initialInfectious;
     }
 
     public static SimulationConfig load(String path) {
@@ -69,5 +79,64 @@ public class SimulationConfig {
 
     public void addModel(ModelConfig model) {
         this.models.add(model);
+    }
+
+    public void clearModels() {
+        this.models.clear();
+    }
+
+    public int getPopulationSize() {
+        return populationSize;
+    }
+
+    public void setPopulationSize(int populationSize) {
+        this.populationSize = populationSize;
+    }
+
+    public double getInitialInfectious() {
+        return initialInfectious;
+    }
+
+    public void setInitialInfectious(double initialInfectious) {
+        this.initialInfectious = initialInfectious;
+    }
+
+
+    public static SimulationConfig getDefault() {
+        return new SimulationConfig(
+                new ArrayList<>(Arrays.asList(
+                        new ModelConfig(
+                                new ArrayList<>(Arrays.asList(
+                                        new CompartmentConfig(0.5, "S", "#00ff00"),
+                                        new CompartmentConfig(0.5, "I", "#ff0000")
+                                )),
+                                "SIR",
+                                0,
+                                0
+                        ),
+                        new ModelConfig(
+                                new ArrayList<>(Arrays.asList(
+                                        new CompartmentConfig(0.5, "S", "#00ff00"),
+                                        new CompartmentConfig(0.5, "E", "#ff7f00"),
+                                        new CompartmentConfig(0.5, "I", "#ff0000")
+                                )),
+                                "SEIR",
+                                0,
+                                0
+                        ),
+                        new ModelConfig(
+                                new ArrayList<>(Arrays.asList(
+                                        new CompartmentConfig(0.5, "S", "#00ff00"),
+                                        new CompartmentConfig(0.5, "E", "#ff7f00"),
+                                        new CompartmentConfig(0.5, "I", "#ff0000")
+                                )),
+                                "SEIR evolutive",
+                                0.01,
+                                0.01
+                        )
+                )),
+                100,
+                0.05
+        );
     }
 }

@@ -8,6 +8,6 @@ public class SimulationViewModel implements ViewModel {
     private ConfigurationScope configScope;
 
     public void initialize() {
-        System.out.println("From SimulationViewModel: " + configScope.getSimulationConfig().uuid);
+        //
     }
 }

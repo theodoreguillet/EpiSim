@@ -26,6 +26,7 @@ public class Simulation {
 
     public synchronized void start() {
         if(!started) {
+            initState();
             startExecutor();
             started = true;
         }
@@ -38,7 +39,7 @@ public class Simulation {
         }
     }
 
-    public synchronized void pause() {
+    public synchronized void pause() throws RuntimeException {
         if(started && !paused) {
             stopExecutor();
             paused = true;
@@ -70,6 +71,10 @@ public class Simulation {
         return speed;
     }
 
+    /**
+     * Retourne l'état de la simulation ou {@code null} si elle n'est pas démarrée.
+     * @return {@code SimulationState} ou {@code null}
+     */
     public SimulationState getState() {
         return state.get();
     }
@@ -83,7 +88,7 @@ public class Simulation {
     private void startExecutor() {
         int period = Math.max((int)(1000.0 / speed), 10);
         executor.scheduleAtFixedRate(() -> {
-            // Do stuff
+            updateState();
         }, 0, period, TimeUnit.MILLISECONDS);
     }
 
@@ -102,5 +107,19 @@ public class Simulation {
             Thread.currentThread().interrupt();
         }
         started = false;
+    }
+
+    /**
+     * Génère l'état initial de la simulation
+     */
+    private void initState() {
+        //
+    }
+
+    /**
+     * Génère l'état suivant de la simulation
+     */
+    private void updateState() {
+        //
     }
 }

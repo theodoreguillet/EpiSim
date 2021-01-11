@@ -155,7 +155,7 @@
                               <fx:include source="component/ModelSelect.fxml" />
                            </children>
                         </HBox>
-                        <Button fx:id="addModelBtn" mnemonicParsing="false" style="-fx-background-radius: 5em; -fx-border-radius: 5em;" text="+">
+                        <Button fx:id="addModelBtn" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="28.0" prefWidth="28.0" style="-fx-background-radius: 5em; -fx-border-radius: 5em;">
                            <HBox.margin>
                               <Insets />
                            </HBox.margin>

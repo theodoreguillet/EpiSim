@@ -17,6 +17,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.HBox;
+import jfxtras.styles.jmetro.MDL2IconFont;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -94,6 +95,8 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
         infecPctController.setMax(100);
         infecPctController.setStep(0.1);
         infecPctController.valueProperty().bindBidirectional(viewModel.infecPctProperty());
+
+        addModelBtn.setGraphic(new MDL2IconFont("\uE710"));
     }
 
     private void handleModelsChanged(ObservableList<String> models) {

@@ -12,6 +12,10 @@ public class SimulationConfig {
      */
     private ArrayList<ModelConfig> models;
     /**
+     * L'index du modèle sélectionné
+     */
+    private int selectedModelId;
+    /**
      * La taille de la population
      */
     private int populationSize;
@@ -83,6 +87,18 @@ public class SimulationConfig {
 
     public void clearModels() {
         this.models.clear();
+    }
+
+    public int getSelectedModelId() {
+        return selectedModelId;
+    }
+
+    public ModelConfig getSelectedModel() {
+        return models.get(selectedModelId);
+    }
+
+    public void setSelectedModelId(int selectedModelId) {
+        this.selectedModelId = selectedModelId;
     }
 
     public int getPopulationSize() {

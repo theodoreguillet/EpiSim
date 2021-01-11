@@ -4,7 +4,6 @@ import de.saxsys.mvvmfx.InjectScope;
 import de.saxsys.mvvmfx.ViewModel;
 import episim.core.CompartmentConfig;
 import episim.core.ModelConfig;
-import episim.core.SimulationConfig;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -81,7 +80,7 @@ public class HomeViewModel implements ViewModel {
     }
 
     private ModelConfig getModelConfig(int modelId) {
-        return configScope.getSimulationConfig().getModels().get(modelId);
+        return configScope.simulationConfig().getModels().get(modelId);
     }
     private CompartmentConfig getCompConfig(int modelId, int compId) {
         return getModelConfig(modelId).getCompartments().get(compId);
@@ -92,11 +91,14 @@ public class HomeViewModel implements ViewModel {
      */
     private void bindConfig() {
         bindModels();
+        selectedModelId.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().setSelectedModelId(newValue.intValue());
+        });
         popSize.addListener((observable, oldValue, newValue) -> {
-            configScope.getSimulationConfig().setPopulationSize(newValue.intValue());
+            configScope.simulationConfig().setPopulationSize(newValue.intValue());
         });
         infecPct.addListener((observable, oldValue, newValue) -> {
-            configScope.getSimulationConfig().setInitialInfectious(newValue.doubleValue() / 100.0);
+            configScope.simulationConfig().setInitialInfectious(newValue.doubleValue() / 100.0);
         });
     }
     private void bindModels() {
@@ -130,7 +132,7 @@ public class HomeViewModel implements ViewModel {
      * Charge les attributs de {@code SimulationConfig} dans {@code HomeViewModel}
      */
     private void loadConfig() {
-        var config = configScope.getSimulationConfig();
+        var config = configScope.simulationConfig();
         models.clear();
         for(var model : config.getModels()) {
             models.add(model.getName());
@@ -140,7 +142,7 @@ public class HomeViewModel implements ViewModel {
         infecPct.set(config.getInitialInfectious() * 100.0);
     }
     private void loadModelConfig(int modelId) {
-        var config = configScope.getSimulationConfig();
+        var config = configScope.simulationConfig();
         var selectedModel = config.getModels().get(modelId);
         modelComps.clear();
         for(var comp : selectedModel.getCompartments()) {

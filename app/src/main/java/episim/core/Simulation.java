@@ -12,11 +12,11 @@ import java.util.concurrent.locks.ReentrantLock;
  * La simulation de l'épidémie
  */
 public class Simulation {
-    private SimulationConfig config;
+    private final SimulationConfig config;
     private double speed = 1; // Vitesse de la simulation en jours par seconde
 
-    private ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);;
-    private AtomicReference<SimulationState> state = new AtomicReference<>(null);
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);;
+    private final AtomicReference<SimulationState> state = new AtomicReference<>(null);
     private boolean started = false;
     private boolean paused = false;
 
@@ -87,9 +87,7 @@ public class Simulation {
 
     private void startExecutor() {
         int period = Math.max((int)(1000.0 / speed), 10);
-        executor.scheduleAtFixedRate(() -> {
-            updateState();
-        }, 0, period, TimeUnit.MILLISECONDS);
+        executor.scheduleAtFixedRate(this::updateState, 0, period, TimeUnit.MILLISECONDS);
     }
 
     private void stopExecutor() throws RuntimeException {

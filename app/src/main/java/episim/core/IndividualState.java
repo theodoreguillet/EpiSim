@@ -1,5 +1,7 @@
 package episim.core;
 
+import java.util.UUID;
+
 /**
  * L'état d'un individu de la simulation
  */
@@ -7,7 +9,7 @@ public class IndividualState {
     /**
      * L'identifiant de l'individu (unique)
      */
-    public final int id;
+    public final UUID uuid;
     /**
      * L'identifiant du compartiment de l'individu
      * -1 si l'individu est supprimé
@@ -26,8 +28,11 @@ public class IndividualState {
      */
     public final double direction;
 
-    public IndividualState(int id, int compartmentId, double posX, double posY, double direction) {
-        this.id = id;
+    public IndividualState(int compartmentId, double posX, double posY, double direction) {
+        this(UUID.randomUUID(), compartmentId, posX, posY, direction);
+    }
+    public IndividualState(UUID uuid, int compartmentId, double posX, double posY, double direction) {
+        this.uuid = uuid;
         this.compartmentId = compartmentId;
         this.posX = posX;
         this.posY = posY;

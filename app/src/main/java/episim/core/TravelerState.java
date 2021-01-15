@@ -1,5 +1,7 @@
 package episim.core;
 
+import java.util.UUID;
+
 /**
  * L'état d'un individu voyagant d'un point à un autre du monde
  */
@@ -28,9 +30,9 @@ public class TravelerState extends IndividualState {
      */
     public final double ratio;
 
-    public TravelerState(int id, int compartmentId, int zoneId, double posX, double posY, double direction,
+    public TravelerState(UUID uuid, int compartmentId, int zoneId, double posX, double posY, double direction,
                          int dstZoneId, double dstX, double dstY, double ratio) {
-        super(id, compartmentId, posX, posY, direction);
+        super(uuid, compartmentId, posX, posY, direction);
         this.zoneId = zoneId;
         this.dstZoneId = dstZoneId;
         this.dstX = dstX;

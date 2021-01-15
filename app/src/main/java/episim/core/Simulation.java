@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class Simulation {
     public final int ZONE_SIZE = 100;
     public final int QUARANTINE_SIZE = ZONE_SIZE / 4;
+    public final int ZONE_MAX_POP = 10000;
     public final double INDIVIDUAL_SPEED = 1;
     public final double INDIVIDUAL_DIRECTION_PROB = 0.05;
     public final double CONTAMINATION_RADIUS = 10;
@@ -145,16 +146,18 @@ public class Simulation {
         }
         for(int i = 0; i < popSize; i++) {
             int zoneIdx = rand.nextInt(nzones);
-            int compId = i < popInfected ? infectiousCompId : susceptibleCompId;
-            double posX = rand.nextInt(ZONE_SIZE);
-            double posY = rand.nextInt(ZONE_SIZE);
-            var direction = (rand.nextDouble() - 2) * Math.PI;
-            individuals.get(zoneIdx).add(
-                    new IndividualState(i, compId, posX, posY, direction)
-            );
+            individuals.get(zoneIdx).add(randIndividual(i < popInfected));
         }
         var quarantine = new ZoneState(new ArrayList<>());
         state.set(new SimulationState(zones, quarantine, new ArrayList<>()));
+    }
+
+    private IndividualState randIndividual(boolean infectious) {
+        int compId = infectious ? infectiousCompId : susceptibleCompId;
+        double posX = rand.nextInt(ZONE_SIZE);
+        double posY = rand.nextInt(ZONE_SIZE);
+        var direction = (rand.nextDouble() - 2) * Math.PI;
+        return new IndividualState(compId, posX, posY, direction);
     }
 
     /**
@@ -177,7 +180,14 @@ public class Simulation {
 
     private ZoneState updateZone(double timeScale, int zoneSize, ZoneState lastZone) {
         ArrayList<IndividualState> individuals = new ArrayList<>();
+
+        // On met a jour chaque individu
         for(var lastInd : lastZone.individuals) {
+            if(randDeath(timeScale)) {
+                // L'individu est mort
+                continue;
+            }
+
             double direction = lastInd.direction;
             if(rand.nextDouble() < INDIVIDUAL_DIRECTION_PROB * timeScale) {
                 direction = MathUtils.angleMod(
@@ -190,7 +200,7 @@ public class Simulation {
             int compId = lastInd.compartmentId;
             if(compId == susceptibleCompId) {
                 for(var other : lastZone.individuals) {
-                    if(other.id != lastInd.id &&
+                    if(other.uuid != lastInd.uuid &&
                             other.compartmentId == infectiousCompId &&
                             MathUtils.dst2(other.posX, other.posY, lastInd.posX, lastInd.posY) <
                                     (CONTAMINATION_RADIUS * CONTAMINATION_RADIUS)/4
@@ -203,9 +213,30 @@ public class Simulation {
                 compId = nextComp(timeScale, compId);
             }
 
-            individuals.add(new IndividualState(lastInd.id, compId, pos[0], pos[1], pos[2]));
+            individuals.add(new IndividualState(lastInd.uuid, compId, pos[0], pos[1], pos[2]));
         }
+
+        // On ajoute les naissances
+        int i = 0;
+        while (i < lastZone.individuals.size() && individuals.size() < ZONE_MAX_POP) {
+            if(randBirth(timeScale)) {
+                // Un individu est né
+                individuals.add(randIndividual(false));
+            }
+            i++;
+        }
+
         return new ZoneState(individuals);
+    }
+
+    private boolean randDeath(double timeScale) {
+        double param = config.getSelectedModel().getDeath();
+        return (rand.nextDouble() < param * timeScale);
+    }
+
+    private boolean randBirth(double timeScale) {
+        double param = config.getSelectedModel().getBirth();
+        return (rand.nextDouble() < param * timeScale);
     }
 
     private int nextComp(double timeScale, int compId) {

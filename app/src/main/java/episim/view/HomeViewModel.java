@@ -139,7 +139,7 @@ public class HomeViewModel implements ViewModel {
         for(var model : config.getModels()) {
             models.add(model.getName());
         }
-        loadModelConfig(selectedModelId.get());
+        selectedModelId.set(config.getSelectedModelId());
         popSize.set(config.getPopulationSize());
         infecPct.set(config.getInitialInfectious() * 100.0);
     }

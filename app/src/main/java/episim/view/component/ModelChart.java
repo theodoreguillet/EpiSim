@@ -1,29 +1,15 @@
 package episim.view.component;
 
-
-import de.saxsys.mvvmfx.FxmlView;
-import de.saxsys.mvvmfx.InjectScope;
-import de.saxsys.mvvmfx.InjectViewModel;
-import episim.core.ModelConfig;
-import episim.view.ConfigurationScope;
-import episim.view.HomeViewModel;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
-
-import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
@@ -31,85 +17,72 @@ import java.util.*;
  * Composant représentant la courbe du menu principal tracée à partir des paramètres initiaux
  */
 public class ModelChart implements Initializable {
+    public static class Chart {
+        private final List<Double> xdata;
+        private final List<Double> ydata;
+        private final String name;
+        private final Color color;
 
-    public static class Chart{
-        private ObservableObjectValue<Color> color;
-        private ObservableList<XYChart.Data<Double, Double>> points;
-
-        public Color getColor() {
-            return color.get();
-        }
-
-        public ObservableObjectValue<Color> colorProperty() {
-            return color;
-        }
-
-        public ObservableList<XYChart.Data<Double, Double>> pointsProperty() {
-            return points;
-        }
-
-        public void setPoints(ObservableList<XYChart.Data<Double, Double>> points) {
-            this.points = points;
+        public Chart(List<Double> xdata, List<Double> ydata, String name, Color color) {
+            this.xdata = xdata;
+            this.ydata = ydata;
+            this.name = name;
+            this.color = color;
         }
     }
 
     @FXML
-    private LineChart<Double, Double> modelChart;
+    private LineChart<Number, Number> modelChart;
 
-    private ObservableList<Chart> data = FXCollections.observableArrayList();
-
-    private List<XYChart.Series<Double, Double>> params = new ArrayList<>();
+    private final ObservableList<Chart> data = FXCollections.observableArrayList();
 
 
     //trace les 3 courbes à partir des paramètres définis par l'utilisateur
     private void drawFunction(){
         modelChart.getData().clear();
 
-        //Pour chaque Chart
-        for(int i=0; i<data.size(); i++){
+        double maxx = 0;
+        double maxy = 0;
+        for(var chart : data) {
+            XYChart.Series<Number, Number> series = new XYChart.Series<>();
 
-            XYChart.Series<Double, Double> tempSeries = new XYChart.Series<Double, Double>();
-            //Pour chaque point de la Chart
-            for(int j=0; j<data.get(i).points.size();j++){
-                //on l'ajoute à notre XYSeries temporaire
-                tempSeries.getData().add(data.get(i).points.get(j));
+            int size = Math.min(chart.xdata.size(), chart.ydata.size());
+            for(int i = 0; i < size; i++) {
+                maxy = Math.max(maxy, chart.ydata.get(i));
+                maxx = Math.max(maxx, chart.xdata.get(i));
+                series.getData().add(new XYChart.Data<>(chart.xdata.get(i), chart.ydata.get(i)));
             }
-            //Puis on ajoute cette série temporaire à notre liste de XYSeries
-            params.add(tempSeries);
+
+            String rgbColor = String.format("%d, %d, %d",
+                    (int) (chart.color.getRed() * 255),
+                    (int) (chart.color.getGreen() * 255),
+                    (int) (chart.color.getBlue() * 255)
+            );
+
+            modelChart.getData().add(series);
+
+            Node node = series.getNode();
+            node.setStyle(node.getStyle() + "-fx-stroke: rgba(" + rgbColor + ", 0.6);");
+            // node.setStyle(node.getStyle() + "-fx-fill: rgba(" + rgbColor + ", 0.15);");
         }
 
-        //Puis on ajoute tous ces series à la courbe
-        for(int k=0; k<params.size(); k++){
-            modelChart.getData().add(params.get(k));
-        }
-
-    }
-
-    public void setData(ObservableList<Chart> data){
-        this.data = data;
+        var yaxis = (NumberAxis)modelChart.getYAxis();
+        yaxis.setUpperBound(Math.ceil(maxy));
+        var xaxis = (NumberAxis)modelChart.getXAxis();
+        xaxis.setUpperBound(Math.ceil(maxx));
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
         data.addListener((ListChangeListener.Change<? extends Chart> c) -> {
-
-            for(var chart: c.getAddedSubList()){
-                chart.colorProperty().addListener((observable1, oldValue1, newValue1) -> {
-                    this.drawFunction();
-                });
-                chart.pointsProperty().addListener((ListChangeListener.Change<? extends XYChart.Data<Double, Double>> c1) -> {
-                    this.drawFunction();
-                });
-            }
             this.drawFunction();
         });
-
         this.drawFunction();
     }
 
-    public ObservableList<Chart> getDataProperty(){
-        return this.data;
+    public ObservableList<Chart> dataProperty(){
+        return data;
     }
 
 }

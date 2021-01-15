@@ -52,11 +52,14 @@ public class HomeViewModel implements ViewModel {
     private final DoubleProperty popSize = new SimpleDoubleProperty();
     private final DoubleProperty infecPct = new SimpleDoubleProperty();
     private final ObservableList<ModelChart.Chart> chartsData = FXCollections.observableArrayList();
+    private final DoubleProperty chartScale = new SimpleDoubleProperty(10);
 
 
     public void initialize() {
         selectedModelId.addListener((observable, oldValue, newValue) -> {
             loadModelConfig(selectedModelId.get());
+        });
+        chartScale.addListener((observable, oldValue, newValue) -> {
             updateChart();
         });
 
@@ -69,9 +72,6 @@ public class HomeViewModel implements ViewModel {
         configScope.publish(ConfigurationScope.SIMULATION);
     }
 
-    public ObservableList<ModelChart.Chart> chartProperty() {
-        return chartsData;
-    }
     public ObservableList<String> modelsProperty() {
         return models;
     }
@@ -93,6 +93,12 @@ public class HomeViewModel implements ViewModel {
     public DoubleProperty infecPctProperty() {
         return infecPct;
     }
+    public ObservableList<ModelChart.Chart> chartProperty() {
+        return chartsData;
+    }
+    public DoubleProperty chartScaleProperty() {
+        return chartScale;
+    }
 
     private ModelConfig getModelConfig(int modelId) {
         return configScope.simulationConfig().getModels().get(modelId);
@@ -108,12 +114,15 @@ public class HomeViewModel implements ViewModel {
         bindModels();
         selectedModelId.addListener((observable, oldValue, newValue) -> {
             configScope.simulationConfig().setSelectedModelId(newValue.intValue());
+            updateChart();
         });
         popSize.addListener((observable, oldValue, newValue) -> {
             configScope.simulationConfig().setPopulationSize(newValue.intValue());
+            updateChart();
         });
         infecPct.addListener((observable, oldValue, newValue) -> {
             configScope.simulationConfig().setInitialInfectious(newValue.doubleValue() / 100.0);
+            updateChart();
         });
     }
     private void bindModels() {
@@ -174,26 +183,41 @@ public class HomeViewModel implements ViewModel {
         modelDeath.set(selectedModel.getDeath());
     }
 
-    private void updateChart(){
-        var data = ModelChartGenerator.generate(getModelConfig(selectedModelId().get()), infecPctProperty().get(), 365, 1);
+    private void updateChart() {
+        var modelConfig = getModelConfig(selectedModelId().get());
 
-        //transformer data en ModelChart.Chart
-        chartProperty().clear();
+        var gen = new ModelChartGenerator(
+                modelConfig,
+                infecPctProperty().get() / 100,
+                popSizeProperty().get(),
+                chartScale.doubleValue(),
+                400
+        );
 
-        ArrayList<ModelChart.Chart> newData = new ArrayList<>();
-
-        for(var CompData: data){
-            ModelChart.Chart tempChart = new ModelChart.Chart();
-            ArrayList<XYChart.Data<Double, Double>> tempList = new ArrayList<>();
-            for(var x: CompData.getX()){
-                for(var y: CompData.getY()){
-                    tempList.add(new XYChart.Data<Double, Double>(x, y));
-                }
-            }
-            tempChart.setPoints(FXCollections.observableArrayList(tempList));
-            newData.add(tempChart);
+        ArrayList<ModelChartGenerator.CompData> data;
+        try {
+            // long time = System.currentTimeMillis();
+            data = gen.generate();
+            // time = System.currentTimeMillis() - time;
+            // System.out.println("ModelChartGenerator ms: " + time);
+        } catch (RuntimeException err) {
+            // L'erreur ne doit pas arriver
+            err.printStackTrace(System.err);
+            return;
         }
 
-        chartProperty().addAll(FXCollections.observableArrayList(newData));
+        ArrayList<ModelChart.Chart> chartData = new ArrayList<>(data.size());
+        for(int i = 0; i < data.size(); i++) {
+            var compData = data.get(i);
+            var compConfig = modelConfig.getCompartments().get(i);
+            var chart = new ModelChart.Chart(
+                    compData.getX(),
+                    compData.getY(),
+                    compConfig.getName(),
+                    Color.valueOf(compConfig.getColor())
+            );
+            chartData.add(chart);
+        }
+        chartProperty().setAll(chartData);
     }
 }

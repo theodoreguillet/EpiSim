@@ -45,7 +45,7 @@ public class ModelComp implements Initializable {
 
     @FXML
     private Rectangle rectangle;
-    private ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.WHITE);
+    private final ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.WHITE);
 
     @FXML
     private Group mainContainer;

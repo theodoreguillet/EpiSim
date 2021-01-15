@@ -185,8 +185,8 @@ public class HomeViewModel implements ViewModel {
         for(var CompData: data){
             ModelChart.Chart tempChart = new ModelChart.Chart();
             ArrayList<XYChart.Data<Double, Double>> tempList = new ArrayList<>();
-            for(var x: CompData.x){
-                for(var y: CompData.y){
+            for(var x: CompData.getX()){
+                for(var y: CompData.getY()){
                     tempList.add(new XYChart.Data<Double, Double>(x, y));
                 }
             }

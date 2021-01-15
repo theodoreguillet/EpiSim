@@ -7,11 +7,13 @@ import de.saxsys.mvvmfx.InjectViewModel;
 import episim.core.ModelConfig;
 import episim.view.ConfigurationScope;
 import episim.view.HomeViewModel;
+import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -23,8 +25,7 @@ import javafx.scene.paint.Color;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Composant représentant la courbe du menu principal tracée à partir des paramètres initiaux
@@ -55,41 +56,33 @@ public class ModelChart implements Initializable {
     @FXML
     private LineChart<Double, Double> modelChart;
 
-    private ObservableList<Chart> data;
+    private ObservableList<Chart> data = FXCollections.observableArrayList();
 
-    private XYChart.Series<Double, Double> S = new XYChart.Series<Double, Double>();
-    private XYChart.Series<Double, Double> I = new XYChart.Series<Double, Double>();
-    private XYChart.Series<Double, Double> R = new XYChart.Series<Double, Double>();
+    private List<XYChart.Series<Double, Double>> params = new ArrayList<>();
 
-    //trace les 3 courbes S,I,R à partir des paramètres définis par l'utilisateur
+
+    //trace les 3 courbes à partir des paramètres définis par l'utilisateur
     private void drawFunction(){
         modelChart.getData().clear();
 
-        int i=0;
-        for(var chart: data){
-            if(i==0){
-                for(var points: chart.points){
-                    S.getData().add(points);
-                }
+        //Pour chaque Chart
+        for(int i=0; i<data.size(); i++){
+
+            XYChart.Series<Double, Double> tempSeries = new XYChart.Series<Double, Double>();
+            //Pour chaque point de la Chart
+            for(int j=0; j<data.get(i).points.size();j++){
+                //on l'ajoute à notre XYSeries temporaire
+                tempSeries.getData().add(data.get(i).points.get(j));
             }
-            if(i==1){
-                for(var points: chart.points){
-                    I.getData().add(points);
-                }
-            }
-            if(i==2){
-                for(var points: chart.points){
-                    R.getData().add(points);
-                }
-            }
-            i++;
+            //Puis on ajoute cette série temporaire à notre liste de XYSeries
+            params.add(tempSeries);
         }
 
-        S.setName("Saines");
-        I.setName("Infectees");
-        R.setName("Retablies");
+        //Puis on ajoute tous ces series à la courbe
+        for(int k=0; k<params.size(); k++){
+            modelChart.getData().add(params.get(k));
+        }
 
-        modelChart.getData().addAll(S,I,R);
     }
 
     public void setData(ObservableList<Chart> data){

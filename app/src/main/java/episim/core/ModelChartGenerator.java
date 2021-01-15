@@ -4,83 +4,88 @@ import javafx.scene.paint.Color;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 
 public abstract class ModelChartGenerator{
 
     public static class CompData{
-        public ArrayList<Double> x;
-        public ArrayList<Double> y;
-        public Color color;
+        private final List<Double> x;
+        private final List<Double> y;
 
-        public void CompData(){
+        CompData(List<Double> x, List<Double> y){
+            this.x = x;
+            this.y = y;
+        }
 
+        public List<Double> getX() {
+            return Collections.unmodifiableList(x);
+        }
+
+        public List<Double> getY() {
+            return Collections.unmodifiableList(y);
         }
     }
 
     //genere les données
-    public static ArrayList<CompData> generate(ModelConfig modelconfig, double infc, double duree, double dt){
+    public static ArrayList<CompData> generate(ModelConfig modelconfig, double infc, int duree, int dt){
 
-        ArrayList<CompData> compData = new ArrayList<>(modelconfig.getCompartments().size()+1);
+        ArrayList<CompData> compData = new ArrayList<>(modelconfig.getCompartments().size());
 
         //on récupère les compartiments
         List<CompartmentConfig> compartments = modelconfig.getCompartments();
 
         //on initialise les paramètres
+        //facteur de naissance
         double eta = modelconfig.getBirth();
+
+        //facteur de décès
         double mu = modelconfig.getDeath();
 
-        double beta = 0;
-        double alpha = 0;
-        double gamma = 0;
+        for(int i=0;i<compartments.size();i++){
+            List<Double> x = new ArrayList<>(duree*dt);
+            List<Double> y = new ArrayList<>(duree*dt);
 
-        CompData S = new CompData();
-        CompData E = new CompData();
-        CompData I = new CompData();
-        CompData R = new CompData();
-
-        if(modelconfig.getCompartments().size() == 2){
-            beta = compartments.get(0).getParam();
-            gamma = compartments.get(1).getParam();
-        }
-
-        if(modelconfig.getCompartments().size() == 3){
-            beta = compartments.get(0).getParam();
-            alpha = compartments.get(1).getParam();
-            gamma = compartments.get(2).getParam();
-        }
-
-        S.y.set(0, 1 - infc/100);
-        E.y.set(0, 0.0); // aucun exposé initialement
-        I.y.set(0, infc/100); // pourcentage d'infectés initialement
-        R.y.set(0, 0.0); // aucun rétabli initialement
-
-        ArrayList<Double> x = new ArrayList<Double>();
-        x.set(0, 0.0);
-
-        //algorithme
-
-        for(int i=1; i<duree; i++){
-            x.set(i, (double) i);
-            S.y.set(i, dt*(-beta*S.y.get(i-1)*I.y.get(i-1) + eta - mu*S.y.get(i-1)));
-
-            if(modelconfig.getCompartments().size() == 3){
-                E.y.set(i, dt*(beta*S.y.get(i-1)*I.y.get(i-1) - alpha*E.y.get(i-1) - mu*E.y.get(i-1)));
+            for(int j=0;j<duree*dt;j++){
+                // si on est dans le premier cas
+                if(j == 0){
+                    if(compartments.get(j).getName() == "S"){
+                        x.add(1 - infc/100);
+                    }
+                    if(compartments.get(j).getName() == "I"){
+                        x.add(infc/100);
+                    }
+                    else{
+                        x.add(0.0);
+                    }
+                    y.add(0.0);
+                }
+                else{
+                    x.add(0.0);
+                    y.add(y.get(j-1) + dt);
+                }
             }
 
-            I.y.set(i, alpha*E.y.get(i-1) - I.y.get(i-1)*(gamma + mu));
-            R.y.set(i, gamma*I.y.get(i-1) - mu*R.y.get(i-1));
+            compData.add(new CompData(x, y));
         }
 
-        S.x = x;
-        E.x = x;
-        I.x = x;
-        R.x = x;
+        //simulation
+        for(int t=1; t<duree*dt; t++){
 
-        compData.set(0, S);
-        compData.set(1, I);
-        compData.set(2, R);
+            for(int i=0; i<compartments.size(); i++){
+
+                if(i==0){
+                    compData.get(i).x.set(t, - compartments.get(i).getParam()*compData.get(i).x.get(t-1)  + eta*compData.get(i).x.get(t-1) - mu*compData.get(i).x.get(t-1));
+                }
+                else if(i==compartments.size()-1){
+                    compData.get(i).x.set(t, compartments.get(i-1).getParam()*compData.get(i).x.get(t-1)  - compartments.get(i).getParam()*compData.get(i).x.get(t-1) - mu*compData.get(i).x.get(t-1));
+                }
+                else{
+                    compData.get(i).x.set(t, compartments.get(i-1).getParam()*compData.get(i).x.get(t-1) - mu*compData.get(i).x.get(t-1));
+                }
+            }
+        }
 
         //Liste de compData
         return compData;

@@ -140,6 +140,8 @@ public class HomeViewModel implements ViewModel {
             models.add(model.getName());
         }
         selectedModelId.set(config.getSelectedModelId());
+        loadModelConfig(selectedModelId.get());
+
         popSize.set(config.getPopulationSize());
         infecPct.set(config.getInitialInfectious() * 100.0);
     }

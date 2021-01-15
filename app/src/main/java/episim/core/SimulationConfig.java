@@ -20,7 +20,7 @@ public class SimulationConfig implements Cloneable {
      */
     private int populationSize;
     /**
-     * Proportion de la population initialement infectée
+     * Proportion de la population initialement infectieuse
      */
     private double initialInfectious;
     /**

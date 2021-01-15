@@ -3,19 +3,17 @@ package episim.view;
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
 import episim.util.SpinnerWrapper;
-import episim.util.StringDoubleConverter;
 import episim.view.component.ModelComp;
 import episim.view.component.ModelSelect;
+import episim.view.component.ModelChart;
 import episim.view.component.SpinnerSlider;
-import javafx.beans.property.DoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.LineChart;
 import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.HBox;
 import jfxtras.styles.jmetro.MDL2IconFont;
 
@@ -31,14 +29,17 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     private HomeViewModel viewModel;
 
     @FXML
+    private ModelChart modelChartController;
+
+    @FXML
+    private Slider modelChartScale;
+
+    @FXML
     private HBox modelsList;
     private ArrayList<ModelSelect> modelsListControllers;
 
     @FXML
     private Button addModelBtn;
-
-    @FXML
-    private LineChart<Double, Double> modelChart;
 
     @FXML
     private HBox modelCompList;
@@ -97,6 +98,19 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
         infecPctController.valueProperty().bindBidirectional(viewModel.infecPctProperty());
 
         addModelBtn.setGraphic(new MDL2IconFont("\uE710"));
+
+        viewModel.chartProperty().addListener((ListChangeListener.Change<? extends ModelChart.Chart> c) -> {
+            modelChartController.dataProperty().setAll(viewModel.chartProperty());
+        });
+        modelChartController.dataProperty().setAll(viewModel.chartProperty());
+
+        modelChartScale.valueProperty().addListener((observable, oldValue, newValue) -> {
+            viewModel.chartScaleProperty().set(Math.round(newValue.doubleValue()));
+        });
+        viewModel.chartScaleProperty().addListener((observable, oldValue, newValue) -> {
+            modelChartScale.valueProperty().set(newValue.doubleValue());
+        });
+        modelChartScale.valueProperty().set(modelChartScale.valueProperty().doubleValue());
     }
 
     private void handleModelsChanged(ObservableList<String> models) {

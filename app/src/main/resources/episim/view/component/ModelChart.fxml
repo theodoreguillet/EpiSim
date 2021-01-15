@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+
+
+<LineChart xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:id="modelChart"  fx:controller="episim.view.component.ModelChart">
+    <xAxis>
+        <NumberAxis side="BOTTOM" />
+    </xAxis>
+    <yAxis>
+        <NumberAxis autoRanging="false" minorTickCount="1" minorTickLength="3.0" side="LEFT" tickLabelGap="1.0" tickLength="5.0" tickUnit="0.5" upperBound="1.0" />
+    </yAxis>
+</LineChart>

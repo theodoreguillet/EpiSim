@@ -133,13 +133,18 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     private void handleModelCompsChanged(ObservableList<HomeViewModel.ModelCompProperty> comps) {
         modelCompList.getChildren().clear();
         modelCompListControllers = new ArrayList<>(comps.size());
-        for(var comp : comps) {
+        for(int i = 0; i < comps.size(); i++) {
+            var comp = comps.get(i);
             try {
                 var loader = ModelComp.load();
                 modelCompList.getChildren().add(loader.getRoot());
                 ModelComp controller = loader.getController();
                 controller.nameProperty().bind(comp.name());
                 controller.valueProperty().bindBidirectional(comp.value());
+                controller.colorProperty().bindBidirectional(comp.color());
+                if(i == comps.size() - 1) {
+                    controller.showParam(false);
+                }
             } catch (Exception err) {
                 // TODO: Report error to user
                 err.printStackTrace(System.err);

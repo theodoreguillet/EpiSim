@@ -6,6 +6,9 @@ import java.io.Serializable;
  * Configuration d'un compartiment du modèle épidémique
  */
 public class CompartmentConfig implements Serializable, Cloneable {
+    public static String SUSCEPTIBLE = "S";
+    public static String INFECTIOUS = "I";
+    public static String RECOVERED = "R";
     /**
      * Le paramètre de transition
      */

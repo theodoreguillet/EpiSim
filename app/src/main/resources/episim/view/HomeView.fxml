@@ -47,18 +47,18 @@
                                                 <fx:include source="component/ModelComp.fxml" />
                                                 <fx:include source="component/ModelComp.fxml" />
                                                 <fx:include source="component/ModelComp.fxml" />
+                                                <StackPane>
+                                                   <children>
+                                                      <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="30.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
+                                                      <Text strokeType="OUTSIDE" strokeWidth="0.0" text="R">
+                                                         <font>
+                                                            <Font size="14.0" />
+                                                         </font>
+                                                      </Text>
+                                                   </children>
+                                                </StackPane>
                                              </children>
                                           </HBox>
-                                          <StackPane>
-                                             <children>
-                                                <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="30.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
-                                                <Text strokeType="OUTSIDE" strokeWidth="0.0" text="R">
-                                                   <font>
-                                                      <Font size="14.0" />
-                                                   </font>
-                                                </Text>
-                                             </children>
-                                          </StackPane>
                                        </children>
                                     </HBox>
                                  </content>

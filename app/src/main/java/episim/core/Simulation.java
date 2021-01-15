@@ -1,27 +1,52 @@
 package episim.core;
 
-import java.util.Timer;
+import episim.util.MathUtils;
+
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * La simulation de l'épidémie
  */
 public class Simulation {
-    private final SimulationConfig config;
-    private double speed = 1; // Vitesse de la simulation en jours par seconde
+    public final int ZONE_SIZE = 100;
+    public final int QUARANTINE_SIZE = ZONE_SIZE / 4;
+    public final double INDIVIDUAL_SPEED = 1;
+    public final double INDIVIDUAL_DIRECTION_PROB = 0.05;
+    public final double CONTAMINATION_RADIUS = 10;
+    public final double MIN_CLOCK_SPEED = 30;
 
-    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);;
+    private final SimulationConfig config;
+    private final int nzones;
+    private final int susceptibleCompId;
+    private final int infectiousCompId;
+    private final int recoveredCompId;
+
+    private double simulationSpeed = 1; // Vitesse de la simulation en jours par seconde
+    private double clockSpeed = MIN_CLOCK_SPEED; // Nombre de mise à jours de la simulation par seconde
+
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     private final AtomicReference<SimulationState> state = new AtomicReference<>(null);
+    private ScheduledFuture<?> task;
     private boolean started = false;
     private boolean paused = false;
 
+    private final Random rand = new Random();
+
     public Simulation(SimulationConfig config) {
         this.config = (SimulationConfig)config.clone();
+        this.nzones = 1;
+        int infectiousCompId = 1;
+        for(int i = 0; i < this.config.getSelectedModel().getCompartments().size(); i++) {
+            if(this.config.getSelectedModel().getCompartments().get(i).getName() == CompartmentConfig.INFECTIOUS) {
+                infectiousCompId = i;
+            }
+        }
+        this.susceptibleCompId = 0;
+        this.infectiousCompId = infectiousCompId;
+        this.recoveredCompId = this.config.getSelectedModel().getCompartments().size() - 1;
     }
 
     public synchronized void start() {
@@ -41,7 +66,7 @@ public class Simulation {
 
     public synchronized void pause() throws RuntimeException {
         if(started && !paused) {
-            stopExecutor();
+            task.cancel(false);
             paused = true;
         }
     }
@@ -62,13 +87,14 @@ public class Simulation {
     }
 
     public synchronized void setSpeed(double speed) {
-        this.speed = speed;
-        executor.shutdown();
+        simulationSpeed = speed;
+        clockSpeed = Math.max(MIN_CLOCK_SPEED, speed);
+        task.cancel(false);
         startExecutor();
     }
 
     public synchronized double getSpeed() {
-        return speed;
+        return simulationSpeed;
     }
 
     /**
@@ -86,14 +112,11 @@ public class Simulation {
     }
 
     private void startExecutor() {
-        int period = Math.max((int)(1000.0 / speed), 10);
-        executor.scheduleAtFixedRate(this::updateState, 0, period, TimeUnit.MILLISECONDS);
+        int period = Math.max((int)(1000.0 / clockSpeed), 10);
+        task = executor.scheduleAtFixedRate(this::updateState, 0, period, TimeUnit.MILLISECONDS);
     }
 
     private void stopExecutor() throws RuntimeException {
-        if(!started) {
-            return;
-        }
         executor.shutdownNow();
         try {
             if(!executor.awaitTermination(10, TimeUnit.SECONDS)) {
@@ -104,20 +127,113 @@ public class Simulation {
             err.printStackTrace(System.err);
             Thread.currentThread().interrupt();
         }
-        started = false;
     }
 
     /**
      * Génère l'état initial de la simulation
      */
     private void initState() {
-        //
+        int popSize = config.getPopulationSize();
+        int popInfected = (int)(config.getInitialInfectious() * (double)popSize);
+
+        var zones = new ArrayList<ZoneState>(nzones);
+        var individuals = new ArrayList<ArrayList<IndividualState>>(nzones);
+
+        for(int i = 0; i < nzones; i++) {
+            individuals.add(new ArrayList<>());
+            zones.add(new ZoneState(individuals.get(i)));
+        }
+        for(int i = 0; i < popSize; i++) {
+            int zoneIdx = rand.nextInt(nzones);
+            int compId = i < popInfected ? infectiousCompId : susceptibleCompId;
+            double posX = rand.nextInt(ZONE_SIZE);
+            double posY = rand.nextInt(ZONE_SIZE);
+            var direction = (rand.nextDouble() - 2) * Math.PI;
+            individuals.get(zoneIdx).add(
+                    new IndividualState(i, compId, posX, posY, direction)
+            );
+        }
+        var quarantine = new ZoneState(new ArrayList<>());
+        state.set(new SimulationState(zones, quarantine, new ArrayList<>()));
     }
 
     /**
      * Génère l'état suivant de la simulation
      */
     private void updateState() {
-        //
+        SimulationState lastState = state.get();
+        double timeScale = simulationSpeed / clockSpeed;
+
+        var zones = new ArrayList<ZoneState>(nzones);
+        for(var lastZone : lastState.zones) {
+            zones.add(updateZone(timeScale, ZONE_SIZE, lastZone));
+        }
+        var quarantine = updateZone(timeScale, QUARANTINE_SIZE, lastState.quarantine);
+
+        ArrayList<TravelerState> travelers = new ArrayList<>();
+
+        state.set(new SimulationState(zones, quarantine, travelers));
+    }
+
+    private ZoneState updateZone(double timeScale, int zoneSize, ZoneState lastZone) {
+        ArrayList<IndividualState> individuals = new ArrayList<>();
+        for(var lastInd : lastZone.individuals) {
+            double direction = lastInd.direction;
+            if(rand.nextDouble() < INDIVIDUAL_DIRECTION_PROB * timeScale) {
+                direction = MathUtils.angleMod(
+                        lastInd.direction + (rand.nextDouble() - 2) * Math.PI/2
+                );
+            }
+
+            var pos = move(zoneSize, lastInd.posX, lastInd.posY, direction, INDIVIDUAL_SPEED * timeScale);
+
+            int compId = lastInd.compartmentId;
+            if(compId == susceptibleCompId) {
+                for(var other : lastZone.individuals) {
+                    if(other.id != lastInd.id &&
+                            other.compartmentId == infectiousCompId &&
+                            MathUtils.dst2(other.posX, other.posY, lastInd.posX, lastInd.posY) <
+                                    (CONTAMINATION_RADIUS * CONTAMINATION_RADIUS)/4
+                    ) {
+                        compId = nextComp(timeScale, compId);
+                        break;
+                    }
+                }
+            } else if(compId != recoveredCompId) {
+                compId = nextComp(timeScale, compId);
+            }
+
+            individuals.add(new IndividualState(lastInd.id, compId, pos[0], pos[1], pos[2]));
+        }
+        return new ZoneState(individuals);
+    }
+
+    private int nextComp(double timeScale, int compId) {
+        if(compId != recoveredCompId) {
+            double param = config.getSelectedModel().getCompartments().get(compId).getParam();
+            if(rand.nextDouble() < param * timeScale) {
+                if(compId == config.getSelectedModel().getCompartments().size() - 1) {
+                    return recoveredCompId;
+                } else {
+                    return compId + 1;
+                }
+            }
+        }
+        return compId;
+    }
+
+    private double[] move(int zoneSize, double posX, double posY, double direction, double speed) {
+        var pos = new double[]{
+                posX + Math.cos(direction) * speed,
+                posY + Math.sin(direction) * speed,
+                direction
+        };
+        if(pos[0] < 0 || pos[0] >= zoneSize) {
+            return move(zoneSize, posX, posY, Math.PI - direction, speed);
+        }
+        if(pos[1] < 0 || pos[1] >= zoneSize) {
+            return move(zoneSize, posX, posY, -direction, speed);
+        }
+        return pos;
     }
 }

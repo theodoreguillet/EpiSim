@@ -2,14 +2,18 @@ package episim.view.component;
 
 import episim.util.SpinnerWrapper;
 import episim.util.StringDoubleConverter;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Group;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 
 import java.io.IOException;
@@ -39,12 +43,26 @@ public class ModelComp implements Initializable {
     private Spinner<Double> spinner;
     private SpinnerWrapper spinnerWrapper;
 
+    @FXML
+    private Rectangle rectangle;
+    private ObjectProperty<Color> color = new SimpleObjectProperty<>(Color.WHITE);
+
+    @FXML
+    private Group mainContainer;
+    @FXML
+    private Group spinnerContainer;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         spinnerWrapper = new SpinnerWrapper(spinner, 0, 10, 0.5, 0.01);
         var valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0, 10, 0.5, 0.01);
         valueFactory.setConverter(new StringDoubleConverter());
         spinner.setValueFactory(valueFactory);
+
+        color.addListener((observable, oldValue, newValue) -> {
+            setCompColor(newValue);
+        });
+        setCompColor(color.get());
     }
 
     /**
@@ -69,5 +87,36 @@ public class ModelComp implements Initializable {
      */
     public void setName(String newName) {
         name.setText(newName);
+    }
+
+    /**
+     * Propriété de la couleur du compartiment
+     * @return La propriété de la couleur
+     */
+    public ObjectProperty<Color> colorProperty() {
+        return color;
+    }
+
+    /**
+     * Définie si le valeur du compartiment est éditable ou non
+     * @param show true si il est éditable, false sinon
+     */
+    public void showParam(boolean show) {
+        if(show) {
+            if(!mainContainer.getChildren().contains(spinnerContainer)) {
+                mainContainer.getChildren().add(spinnerContainer);
+            }
+        } else {
+            mainContainer.getChildren().remove(spinnerContainer);
+        }
+    }
+
+    private void setCompColor(Color color) {
+        var gradiant = new RadialGradient(0, 0, 0.5, 0.5, 0.6, true,
+                CycleMethod.NO_CYCLE,
+                new Stop(0, Color.WHITE),
+                new Stop(1, color)
+        );
+        rectangle.setFill(gradiant);
     }
 }

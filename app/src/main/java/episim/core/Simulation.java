@@ -3,6 +3,7 @@ package episim.core;
 import episim.util.MathUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,7 +42,7 @@ public class Simulation {
         this.nzones = 1;
         int infectiousCompId = 1;
         for(int i = 0; i < this.config.getSelectedModel().getCompartments().size(); i++) {
-            if(this.config.getSelectedModel().getCompartments().get(i).getName() == CompartmentConfig.INFECTIOUS) {
+            if(this.config.getSelectedModel().getCompartments().get(i).getName().equals(CompartmentConfig.INFECTIOUS)) {
                 infectiousCompId = i;
             }
         }
@@ -188,6 +189,12 @@ public class Simulation {
                 continue;
             }
 
+            int compId = updateComp(
+                    timeScale,
+                    lastInd.compartmentId,
+                    hasMetInfectious(lastInd, lastZone.individuals)
+            );
+
             double direction = lastInd.direction;
             if(rand.nextDouble() < INDIVIDUAL_DIRECTION_PROB * timeScale) {
                 direction = MathUtils.angleMod(
@@ -195,23 +202,7 @@ public class Simulation {
                 );
             }
 
-            var pos = move(zoneSize, lastInd.posX, lastInd.posY, direction, INDIVIDUAL_SPEED * timeScale);
-
-            int compId = lastInd.compartmentId;
-            if(compId == susceptibleCompId) {
-                for(var other : lastZone.individuals) {
-                    if(other.uuid != lastInd.uuid &&
-                            other.compartmentId == infectiousCompId &&
-                            MathUtils.dst2(other.posX, other.posY, lastInd.posX, lastInd.posY) <
-                                    (CONTAMINATION_RADIUS * CONTAMINATION_RADIUS)/4
-                    ) {
-                        compId = nextComp(timeScale, compId);
-                        break;
-                    }
-                }
-            } else if(compId != recoveredCompId) {
-                compId = nextComp(timeScale, compId);
-            }
+            var pos = updatePos(timeScale, zoneSize, lastInd.posX, lastInd.posY, lastInd.direction);
 
             individuals.add(new IndividualState(lastInd.uuid, compId, pos[0], pos[1], pos[2]));
         }
@@ -229,6 +220,19 @@ public class Simulation {
         return new ZoneState(individuals);
     }
 
+    private boolean hasMetInfectious(IndividualState ind, List<IndividualState> others) {
+        for(var other : others) {
+            if(other.uuid != ind.uuid &&
+                    other.compartmentId == infectiousCompId &&
+                    MathUtils.dst2(other.posX, other.posY, ind.posX, ind.posY) <
+                            (CONTAMINATION_RADIUS * CONTAMINATION_RADIUS)/4
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean randDeath(double timeScale) {
         double param = config.getSelectedModel().getDeath();
         return (rand.nextDouble() < param * timeScale);
@@ -239,18 +243,23 @@ public class Simulation {
         return (rand.nextDouble() < param * timeScale);
     }
 
-    private int nextComp(double timeScale, int compId) {
-        if(compId != recoveredCompId) {
+    private int updateComp(double timeScale, int compId, boolean metInfectious) {
+        if(compId != recoveredCompId && (compId != susceptibleCompId || !metInfectious)) {
             double param = config.getSelectedModel().getCompartments().get(compId).getParam();
             if(rand.nextDouble() < param * timeScale) {
-                if(compId == config.getSelectedModel().getCompartments().size() - 1) {
-                    return recoveredCompId;
-                } else {
-                    return compId + 1;
-                }
+                return compId + 1;
             }
         }
         return compId;
+    }
+
+    private double[] updatePos(double timeScale, int zoneSize, double posX, double posY, double direction) {
+        if(rand.nextDouble() < INDIVIDUAL_DIRECTION_PROB * timeScale) {
+            direction = MathUtils.angleMod(
+                    direction + (rand.nextDouble() - 2) * Math.PI/2
+            );
+        }
+        return move(zoneSize, posX, posY, direction, INDIVIDUAL_SPEED * timeScale);
     }
 
     private double[] move(int zoneSize, double posX, double posY, double direction, double speed) {

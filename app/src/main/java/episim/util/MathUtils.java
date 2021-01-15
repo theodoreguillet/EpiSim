@@ -35,4 +35,22 @@ public class MathUtils {
         }
         return val;
     }
+
+    /**
+     * Retourne un angle modulo 2pi compris entre -pi et pi
+     * @param angle Un angle en radian
+     * @return Un angle compris entre -pi et pi
+     */
+    public static double angleMod(double angle) {
+        return (angle % (2 * Math.PI)) - Math.PI;
+    }
+
+    /**
+     * Retourne le carré de la distance entre (x1, y1) et (x2, y2)
+     */
+    public static double dst2(double x1, double y1, double x2, double y2) {
+        double dx = x1 - x2;
+        double dy = y1 - y2;
+        return dx * dx + dy * dy;
+    }
 }

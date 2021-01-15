@@ -15,18 +15,17 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
 
-
 <BorderPane prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="episim.view.SimulationView">
    <top>
       <BorderPane>
          <right>
-            <Button mnemonicParsing="false" text="Terminer la simulation" BorderPane.alignment="CENTER" />
+            <Button mnemonicParsing="false" onAction="#stopSimulation" text="Terminer la simulation" BorderPane.alignment="CENTER" />
          </right>
          <center>
             <HBox alignment="CENTER" spacing="10.0" BorderPane.alignment="CENTER">
                <children>
-                  <Button minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="24.0" prefWidth="24.0" />
-                  <Button layoutX="379.0" layoutY="20.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="24.0" prefWidth="24.0" />
+                  <Button fx:id="pauseResumeButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#togglePauseResume" prefHeight="24.0" prefWidth="24.0" />
+                  <Button fx:id="saveButton" layoutX="379.0" layoutY="20.0" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#saveSimulation" prefHeight="24.0" prefWidth="24.0" />
                </children>
                <opaqueInsets>
                   <Insets />
@@ -37,15 +36,15 @@
             </HBox>
          </center>
          <left>
-            <VBox spacing="5.0" BorderPane.alignment="CENTER">
+            <VBox prefWidth="170.0" spacing="5.0" BorderPane.alignment="CENTER">
                <children>
                   <HBox alignment="BOTTOM_LEFT">
                      <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
+                        <Text fx:id="simulationSpeedText" strokeType="OUTSIDE" strokeWidth="0.0" text="0" />
                         <Text layoutX="10.0" layoutY="22.0" strokeType="OUTSIDE" strokeWidth="0.0" text=" jours simulés par seconde" />
                      </children>
                   </HBox>
-                  <Slider />
+                  <Slider fx:id="simulationSpeed" min="1.0" snapToTicks="true" />
                </children>
             </VBox>
          </left>

@@ -28,9 +28,9 @@ public class TravelerState extends IndividualState {
      */
     public final double ratio;
 
-    public TravelerState(int compartmentId, int zoneId, double posX, double posY, int dstZoneId,
-                         double dstX, double dstY, double ratio) {
-        super(compartmentId, posX, posY);
+    public TravelerState(int id, int compartmentId, int zoneId, double posX, double posY, double direction,
+                         int dstZoneId, double dstX, double dstY, double ratio) {
+        super(id, compartmentId, posX, posY, direction);
         this.zoneId = zoneId;
         this.dstZoneId = dstZoneId;
         this.dstX = dstX;

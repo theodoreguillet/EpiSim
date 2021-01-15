@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * Configuration de la simulation d'épidémie
  */
-public class SimulationConfig {
+public class SimulationConfig implements Cloneable {
     /**
      * Les modèles épidémiques
      */
@@ -23,16 +23,22 @@ public class SimulationConfig {
      * Proportion de la population initialement infectée
      */
     private double initialInfectious;
+    /**
+     * La distance minimum pour transmettre le virus
+     */
+    private double infectionRadius;
 
     SimulationConfig() {
         this.models = new ArrayList<>();
         this.populationSize = 0;
         this.initialInfectious = 0;
+        this.infectionRadius = 0;
     }
-    SimulationConfig(ArrayList<ModelConfig> models, int populationSize, double initialInfectious) {
+    SimulationConfig(ArrayList<ModelConfig> models, int populationSize, double initialInfectious, double infectionRadius) {
         this.models = models;
         this.populationSize = populationSize;
         this.initialInfectious = initialInfectious;
+        this.infectionRadius = infectionRadius;
     }
 
     public static SimulationConfig load(String path) {
@@ -117,6 +123,14 @@ public class SimulationConfig {
         this.initialInfectious = initialInfectious;
     }
 
+    public double getInfectionRadius() {
+        return infectionRadius;
+    }
+
+    public void setInfectionRadius(double infectionRadius) {
+        this.infectionRadius = infectionRadius;
+    }
+
 
     public static SimulationConfig getDefault() {
         return new SimulationConfig(
@@ -124,7 +138,8 @@ public class SimulationConfig {
                         new ModelConfig(
                                 new ArrayList<>(Arrays.asList(
                                         new CompartmentConfig(0.5, "S", "#00ff00"),
-                                        new CompartmentConfig(0.5, "I", "#ff0000")
+                                        new CompartmentConfig(0.5, "I", "#ff0000"),
+                                        new CompartmentConfig(0, "R", "#0000ff")
                                 )),
                                 "SIR",
                                 0,
@@ -134,7 +149,8 @@ public class SimulationConfig {
                                 new ArrayList<>(Arrays.asList(
                                         new CompartmentConfig(0.5, "S", "#00ff00"),
                                         new CompartmentConfig(0.5, "E", "#ff7f00"),
-                                        new CompartmentConfig(0.5, "I", "#ff0000")
+                                        new CompartmentConfig(0.5, "I", "#ff0000"),
+                                        new CompartmentConfig(0, "R", "#0000ff")
                                 )),
                                 "SEIR",
                                 0,
@@ -144,7 +160,8 @@ public class SimulationConfig {
                                 new ArrayList<>(Arrays.asList(
                                         new CompartmentConfig(0.5, "S", "#00ff00"),
                                         new CompartmentConfig(0.5, "E", "#ff7f00"),
-                                        new CompartmentConfig(0.5, "I", "#ff0000")
+                                        new CompartmentConfig(0.5, "I", "#ff0000"),
+                                        new CompartmentConfig(0, "R", "#0000ff")
                                 )),
                                 "SEIR evolutive",
                                 0.01,
@@ -152,7 +169,8 @@ public class SimulationConfig {
                         )
                 )),
                 100,
-                0.05
+                0.05,
+                10
         );
     }
 }

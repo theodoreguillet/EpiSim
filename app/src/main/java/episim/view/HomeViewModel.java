@@ -12,6 +12,7 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.scene.paint.Color;
 import javafx.scene.chart.XYChart;
 
 import java.util.*;
@@ -23,8 +24,8 @@ public class HomeViewModel implements ViewModel {
     static class ModelCompProperty {
         private final DoubleProperty value = new SimpleDoubleProperty();
         private final StringProperty name = new SimpleStringProperty();
-        private final StringProperty color = new SimpleStringProperty();
-        public ModelCompProperty(double value, String name, String color) {
+        private final ObjectProperty<Color> color = new SimpleObjectProperty<>();
+        public ModelCompProperty(double value, String name, Color color) {
             this.value.set(value);
             this.name.set(name);
             this.color.set(color);
@@ -32,7 +33,7 @@ public class HomeViewModel implements ViewModel {
         public DoubleProperty value() {
             return value;
         }
-        public StringProperty color() {
+        public ObjectProperty<Color> color() {
             return color;
         }
         public StringProperty name() {
@@ -93,7 +94,7 @@ public class HomeViewModel implements ViewModel {
         return infecPct;
     }
 
-    public ModelConfig getModelConfig(int modelId) {
+    private ModelConfig getModelConfig(int modelId) {
         return configScope.simulationConfig().getModels().get(modelId);
     }
     private CompartmentConfig getCompConfig(int modelId, int compId) {
@@ -101,7 +102,7 @@ public class HomeViewModel implements ViewModel {
     }
 
     /**
-     * Connecte les propriétés de {@code HomeViewModel} aux attributs de {@code SimulationConfig}
+     * Connecte les propriétés de {@code HomeViewModel} au attributs de {@code SimulationConfig}
      */
     private void bindConfig() {
         bindModels();
@@ -116,6 +117,7 @@ public class HomeViewModel implements ViewModel {
         });
     }
     private void bindModels() {
+        bindModelComps();
         modelComps.addListener((ListChangeListener.Change<? extends ModelCompProperty> c) -> {
             bindModelComps();
             updateChart();
@@ -142,7 +144,7 @@ public class HomeViewModel implements ViewModel {
                 updateChart();
             });
             comp.color().addListener((observable, oldValue, newValue) -> {
-                getCompConfig(selectedModelId.get(), compId).setColor(newValue);
+                getCompConfig(selectedModelId.get(), compId).setColor(newValue.toString());
                 updateChart();
             });
         }
@@ -166,7 +168,7 @@ public class HomeViewModel implements ViewModel {
         var selectedModel = config.getModels().get(modelId);
         modelComps.clear();
         for(var comp : selectedModel.getCompartments()) {
-            modelComps.add(new ModelCompProperty(comp.getParam(), comp.getName(), comp.getColor()));
+            modelComps.add(new ModelCompProperty(comp.getParam(), comp.getName(),Color.valueOf(comp.getColor())));
         }
         modelBirth.set(selectedModel.getBirth());
         modelDeath.set(selectedModel.getDeath());

@@ -5,6 +5,10 @@ package episim.core;
  */
 public class IndividualState {
     /**
+     * L'identifiant de l'individu (unique)
+     */
+    public final int id;
+    /**
      * L'identifiant du compartiment de l'individu
      * -1 si l'individu est supprimé
      */
@@ -17,10 +21,16 @@ public class IndividualState {
      * La coordonée verticale de la position de l'individu dans sa zone
      */
     public final double posY;
+    /**
+     * La direction du mouvement de l'individu
+     */
+    public final double direction;
 
-    public IndividualState(int compartmentId, double posX, double posY) {
+    public IndividualState(int id, int compartmentId, double posX, double posY, double direction) {
+        this.id = id;
         this.compartmentId = compartmentId;
         this.posX = posX;
         this.posY = posY;
+        this.direction = direction;
     }
 }

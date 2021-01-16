@@ -3,17 +3,12 @@ package episim.view;
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
 import episim.util.SpinnerWrapper;
-import episim.view.component.ModelComp;
-import episim.view.component.ModelSelect;
-import episim.view.component.ModelChart;
-import episim.view.component.SpinnerSlider;
+import episim.view.component.*;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Button;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import jfxtras.styles.jmetro.MDL2IconFont;
 
@@ -58,6 +53,22 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
 
     @FXML
     private SpinnerSlider infecPctController;
+
+    @FXML
+    private ChoiceBox<String> simulationMode;
+
+    @FXML
+    private Accordion rulesAccordion;
+    @FXML
+    private TitledPane rulesDefaultExpendedPane;
+    @FXML
+    private EpidemicRule confinementRuleController;
+    @FXML
+    private EpidemicRule maskWearRuleController;
+    @FXML
+    private EpidemicRule quarantineRuleController;
+    @FXML
+    private EpidemicRule socialDistancingRuleController;
 
     @FXML
     private void onStartSimulationAction() {
@@ -111,6 +122,27 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
             modelChartScale.valueProperty().set(newValue.doubleValue());
         });
         modelChartScale.valueProperty().set(modelChartScale.valueProperty().doubleValue());
+
+        simulationMode.getItems().setAll(
+                HomeViewModel.SIMULATION_SIMPLE,
+                HomeViewModel.SIMULATION_CENTER,
+                HomeViewModel.SIMULATION_ZONES
+        );
+        simulationMode.valueProperty().bindBidirectional(viewModel.simulationMode());
+
+        confinementRuleController.respectProperty().bindBidirectional(viewModel.confinementRespect());
+        confinementRuleController.delayProperty().bindBidirectional(viewModel.confinementDelay());
+
+        maskWearRuleController.respectProperty().bindBidirectional(viewModel.maskWearRespect());
+        maskWearRuleController.delayProperty().bindBidirectional(viewModel.maskWearDelay());
+
+        quarantineRuleController.respectProperty().bindBidirectional(viewModel.quarantineRespect());
+        quarantineRuleController.delayProperty().bindBidirectional(viewModel.quarantineDelay());
+
+        socialDistancingRuleController.respectProperty().bindBidirectional(viewModel.socialDistancingRespect());
+        socialDistancingRuleController.delayProperty().bindBidirectional(viewModel.socialDistancingDelay());
+
+        rulesAccordion.setExpandedPane(rulesDefaultExpendedPane);
     }
 
     private void handleModelsChanged(ObservableList<String> models) {

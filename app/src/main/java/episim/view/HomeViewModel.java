@@ -21,7 +21,7 @@ import java.util.*;
  * Modèle de la vue de l'accueil
  */
 public class HomeViewModel implements ViewModel {
-    static class ModelCompProperty {
+    public static class ModelCompProperty {
         private final DoubleProperty value = new SimpleDoubleProperty();
         private final StringProperty name = new SimpleStringProperty();
         private final ObjectProperty<Color> color = new SimpleObjectProperty<>();
@@ -40,6 +40,9 @@ public class HomeViewModel implements ViewModel {
             return name;
         }
     }
+    public static final String SIMULATION_SIMPLE = "Spatialisation simple";
+    public static final String SIMULATION_ZONES = "Zones multiples";
+    public static final String SIMULATION_CENTER = "Centre ville";
 
     @InjectScope
     private ConfigurationScope configScope;
@@ -53,6 +56,15 @@ public class HomeViewModel implements ViewModel {
     private final DoubleProperty infecPct = new SimpleDoubleProperty();
     private final ObservableList<ModelChart.Chart> chartsData = FXCollections.observableArrayList();
     private final DoubleProperty chartScale = new SimpleDoubleProperty(10);
+    private final StringProperty simulationMode = new SimpleStringProperty(SIMULATION_SIMPLE);
+    private final DoubleProperty confinementRespect = new SimpleDoubleProperty(0);
+    private final DoubleProperty confinementDelay = new SimpleDoubleProperty(0);
+    private final DoubleProperty maskWearRespect = new SimpleDoubleProperty(0);
+    private final DoubleProperty maskWearDelay = new SimpleDoubleProperty(0);
+    private final DoubleProperty quarantineRespect = new SimpleDoubleProperty(0);
+    private final DoubleProperty quarantineDelay = new SimpleDoubleProperty(0);
+    private final DoubleProperty socialDistancingRespect = new SimpleDoubleProperty(0);
+    private final DoubleProperty socialDistancingDelay = new SimpleDoubleProperty(0);
 
 
     public void initialize() {
@@ -96,8 +108,35 @@ public class HomeViewModel implements ViewModel {
     public ObservableList<ModelChart.Chart> chartProperty() {
         return chartsData;
     }
+    public StringProperty simulationMode() {
+        return simulationMode;
+    }
     public DoubleProperty chartScaleProperty() {
         return chartScale;
+    }
+    public DoubleProperty confinementRespect() {
+        return confinementRespect;
+    }
+    public DoubleProperty confinementDelay() {
+        return confinementDelay;
+    }
+    public DoubleProperty maskWearRespect() {
+        return maskWearRespect;
+    }
+    public DoubleProperty maskWearDelay() {
+        return maskWearDelay;
+    }
+    public DoubleProperty quarantineRespect() {
+        return quarantineRespect;
+    }
+    public DoubleProperty quarantineDelay() {
+        return quarantineDelay;
+    }
+    public DoubleProperty socialDistancingRespect() {
+        return socialDistancingRespect;
+    }
+    public DoubleProperty socialDistancingDelay() {
+        return socialDistancingDelay;
     }
 
     private ModelConfig getModelConfig(int modelId) {
@@ -123,6 +162,51 @@ public class HomeViewModel implements ViewModel {
         infecPct.addListener((observable, oldValue, newValue) -> {
             configScope.simulationConfig().setInitialInfectious(newValue.doubleValue() / 100.0);
             updateChart();
+        });
+        simulationMode.addListener((observable, oldValue, newValue) -> {
+            var config = configScope.simulationConfig();
+            switch (newValue) {
+                case SIMULATION_SIMPLE -> {
+                    config.setEnableCenterZone(false);
+                    config.setEnableMultiZone(false);
+                }
+                case SIMULATION_CENTER -> {
+                    config.setEnableCenterZone(true);
+                    config.setEnableMultiZone(false);
+                }
+                case SIMULATION_ZONES -> {
+                    config.setEnableCenterZone(false);
+                    config.setEnableMultiZone(true);
+                }
+            }
+        });
+
+        confinementRespect.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getConfinement().setRespectProb(newValue.doubleValue() / 100.0);
+        });
+        confinementDelay.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getConfinement().setDelay(newValue.doubleValue());
+        });
+
+        maskWearRespect.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getMaskWear().setRespectProb(newValue.doubleValue() / 100.0);
+        });
+        maskWearDelay.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getMaskWear().setDelay(newValue.doubleValue());
+        });
+
+        quarantineRespect.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getQuarantine().setRespectProb(newValue.doubleValue() / 100.0);
+        });
+        quarantineDelay.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getQuarantine().setDelay(newValue.doubleValue());
+        });
+
+        socialDistancingRespect.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getSocialDistancing().setRespectProb(newValue.doubleValue() / 100.0);
+        });
+        socialDistancingDelay.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getSocialDistancing().setDelay(newValue.doubleValue());
         });
     }
     private void bindModels() {
@@ -173,6 +257,20 @@ public class HomeViewModel implements ViewModel {
 
         popSize.set(config.getPopulationSize());
         infecPct.set(config.getInitialInfectious() * 100.0);
+        simulationMode.set(config.isEnableMultiZone() ? SIMULATION_ZONES
+                : config.isEnableCenterZone() ? SIMULATION_CENTER : SIMULATION_SIMPLE);
+
+        confinementRespect.set(config.getConfinement().getRespectProb() * 100.0);
+        confinementDelay.set(config.getConfinement().getDelay());
+
+        quarantineRespect.set(config.getQuarantine().getRespectProb() * 100.0);
+        quarantineDelay.set(config.getQuarantine().getDelay());
+
+        maskWearRespect.set(config.getMaskWear().getRespectProb() * 100.0);
+        maskWearDelay.set(config.getMaskWear().getDelay());
+
+        socialDistancingRespect.set(config.getSocialDistancing().getRespectProb() * 100.0);
+        socialDistancingDelay.set(config.getSocialDistancing().getDelay());
     }
     private void loadModelConfig(int modelId) {
         var config = configScope.simulationConfig();

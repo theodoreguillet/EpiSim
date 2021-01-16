@@ -27,6 +27,9 @@ public class App extends MvvmfxGuiceApplication {
         JMetro jMetro = new JMetro(Style.LIGHT);
         jMetro.setScene(scene);
 
+        // Apply css styling
+        scene.getStylesheets().add("episim/css/styles.css");
+
         primaryStage.setOnCloseRequest((e) -> {
             Platform.exit();
             System.exit(0);

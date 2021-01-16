@@ -18,6 +18,6 @@ public class StringDoubleConverter extends StringConverter<Double> {
 
     @Override
     public Double fromString(String string) {
-        return Double.parseDouble(string.replace(',','.'));
+        return string.isEmpty() ? 0.0 : Double.parseDouble(string.replace(',','.'));
     }
 }

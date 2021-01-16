@@ -7,10 +7,6 @@ import java.util.ArrayList;
  */
 public class SimulationRuleConfig implements Cloneable {
     /**
-     * Définie si la règle est activée ou non
-     */
-    private boolean enabled;
-    /**
      * La probabilité qu'un individu respecte la règle par jour
      */
     private double respectProb;
@@ -20,12 +16,10 @@ public class SimulationRuleConfig implements Cloneable {
     private double delay;
 
     public SimulationRuleConfig() {
-        this.enabled = false;
         this.respectProb = 0;
         this.delay = 0;
     }
-    public SimulationRuleConfig(boolean enabled, double respectProb, double delay) {
-        this.enabled = enabled;
+    public SimulationRuleConfig(double respectProb, double delay) {
         this.respectProb = respectProb;
         this.delay = delay;
     }
@@ -42,11 +36,7 @@ public class SimulationRuleConfig implements Cloneable {
     }
 
     public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
+        return respectProb != 0;
     }
 
     public double getRespectProb() {

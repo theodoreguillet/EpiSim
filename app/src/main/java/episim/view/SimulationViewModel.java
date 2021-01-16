@@ -86,7 +86,7 @@ public class SimulationViewModel implements ViewModel {
         createSimulationWorld(state);
         updateSimulationChart(state);
 
-        simulationSpeed.set(10);
+        simulationSpeed.set(1);
     }
 
     public void stopSimulation() {

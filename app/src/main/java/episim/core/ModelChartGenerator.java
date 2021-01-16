@@ -36,6 +36,7 @@ public class ModelChartGenerator{
     private final double tmax;
     private final int npoints;
     private final int ncomps;
+    private final double infectionFactor; // Change le facteur de transition S ->
     private int susceptibleCompId;
     private int infectiousCompId;
     private int recoveredCompId;
@@ -47,17 +48,26 @@ public class ModelChartGenerator{
      * @param modelconfig La configuration du modèle
      * @param initialInfectious La proportion de la population initialement infectieuse
      * @param populationSize La taille de la population
+     * @param pseudoSpatialisation Simule la spatialisation
      * @param tmax Le temps maximum de l'intervalle étudié [0, tmax]
      * @param npoints Le nombre de points de la courbe
      */
     public ModelChartGenerator(ModelConfig modelconfig, double initialInfectious, double populationSize,
-                               double tmax, int npoints) {
+                               boolean pseudoSpatialisation, double tmax, int npoints) {
         this.modelconfig = modelconfig;
         this.initialInfectious = initialInfectious;
         this.initPopulationSize = populationSize;
         this.tmax = tmax;
         this.npoints = npoints;
         ncomps = modelconfig.getCompartments().size();
+
+        if(pseudoSpatialisation) {
+            // On simule grossièrement la spatialisation
+            infectionFactor = Math.PI * Simulation.CONTAMINATION_RADIUS * Simulation.CONTAMINATION_RADIUS
+                        / ((double)Simulation.ZONE_SIZE * (double) Simulation.ZONE_SIZE);
+        } else {
+            infectionFactor = 1.0;
+        }
     }
 
     /**
@@ -135,7 +145,7 @@ public class ModelChartGenerator{
                 fval += birth;
 
                 double infecPop = y.get(infectiousCompId);
-                compOutPop = comp.getParam() * compPop * infecPop;
+                compOutPop = comp.getParam() * compPop * infecPop * infectionFactor;
             } else {
                 compOutPop = comp.getParam() * compPop;
             }

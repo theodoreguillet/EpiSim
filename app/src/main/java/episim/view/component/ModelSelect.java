@@ -7,7 +7,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Toggle;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 import jfxtras.styles.jmetro.MDL2IconFont;
 
@@ -61,6 +63,18 @@ public class ModelSelect implements Initializable {
      */
     public BooleanProperty selectedProperty() {
         return toggle.selectedProperty();
+    }
+
+    /**
+     * Définie le groupe du {@code ToggleButton}
+     * @param group Le {@code ToggleGroup}
+     */
+    public void setToggleGroup(ToggleGroup group) {
+        toggle.setToggleGroup(group);
+    }
+
+    public Toggle getToggle() {
+        return toggle;
     }
 
     /**

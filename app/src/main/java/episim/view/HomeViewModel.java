@@ -6,6 +6,7 @@ import episim.core.CompartmentConfig;
 import episim.core.ModelChartGenerator;
 import episim.core.ModelConfig;
 import episim.view.component.ModelChart;
+import episim.view.component.ModelComp;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
@@ -55,7 +56,8 @@ public class HomeViewModel implements ViewModel {
     private final DoubleProperty popSize = new SimpleDoubleProperty();
     private final DoubleProperty infecPct = new SimpleDoubleProperty();
     private final ObservableList<ModelChart.Chart> chartsData = FXCollections.observableArrayList();
-    private final DoubleProperty chartScale = new SimpleDoubleProperty(10);
+    private final BooleanProperty pseudoSpatialisation = new SimpleBooleanProperty(true);
+    private final DoubleProperty chartScale = new SimpleDoubleProperty(100);
     private final StringProperty simulationMode = new SimpleStringProperty(SIMULATION_SIMPLE);
     private final DoubleProperty confinementRespect = new SimpleDoubleProperty(0);
     private final DoubleProperty confinementDelay = new SimpleDoubleProperty(0);
@@ -72,6 +74,9 @@ public class HomeViewModel implements ViewModel {
             loadModelConfig(selectedModelId.get());
         });
         chartScale.addListener((observable, oldValue, newValue) -> {
+            updateChart();
+        });
+        pseudoSpatialisation.addListener((observable, oldValue, newValue) -> {
             updateChart();
         });
 
@@ -107,6 +112,9 @@ public class HomeViewModel implements ViewModel {
     }
     public ObservableList<ModelChart.Chart> chartProperty() {
         return chartsData;
+    }
+    public BooleanProperty pseudoSpatialisation() {
+        return pseudoSpatialisation;
     }
     public StringProperty simulationMode() {
         return simulationMode;
@@ -290,6 +298,7 @@ public class HomeViewModel implements ViewModel {
                 modelConfig,
                 infecPctProperty().get() / 100,
                 popSizeProperty().get(),
+                pseudoSpatialisation.get(),
                 chartScale.doubleValue(),
                 400
         );

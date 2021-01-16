@@ -255,8 +255,8 @@ public class SimulationConfig implements Cloneable {
                 new ArrayList<>(Arrays.asList(
                         new ModelConfig(
                                 new ArrayList<>(Arrays.asList(
-                                        new CompartmentConfig(0.5, "S", "#00ff00"),
-                                        new CompartmentConfig(0.5, "I", "#ff0000"),
+                                        new CompartmentConfig(0.06, "S", "#00ff00"),
+                                        new CompartmentConfig(0.04, "I", "#ff0000"),
                                         new CompartmentConfig(0, "R", "#0000ff")
                                 )),
                                 "SIR",
@@ -265,9 +265,9 @@ public class SimulationConfig implements Cloneable {
                         ),
                         new ModelConfig(
                                 new ArrayList<>(Arrays.asList(
-                                        new CompartmentConfig(0.5, "S", "#00ff00"),
-                                        new CompartmentConfig(0.5, "E", "#ff7f00"),
-                                        new CompartmentConfig(0.5, "I", "#ff0000"),
+                                        new CompartmentConfig(0.06, "S", "#00ff00"),
+                                        new CompartmentConfig(0.25, "E", "#ff7f00"),
+                                        new CompartmentConfig(0.04, "I", "#ff0000"),
                                         new CompartmentConfig(0, "R", "#0000ff")
                                 )),
                                 "SEIR",
@@ -276,9 +276,9 @@ public class SimulationConfig implements Cloneable {
                         ),
                         new ModelConfig(
                                 new ArrayList<>(Arrays.asList(
-                                        new CompartmentConfig(0.5, "S", "#00ff00"),
-                                        new CompartmentConfig(0.5, "E", "#ff7f00"),
-                                        new CompartmentConfig(0.5, "I", "#ff0000"),
+                                        new CompartmentConfig(0.06, "S", "#00ff00"),
+                                        new CompartmentConfig(0.25, "E", "#ff7f00"),
+                                        new CompartmentConfig(0.04, "I", "#ff0000"),
                                         new CompartmentConfig(0, "R", "#0000ff")
                                 )),
                                 "SEIR evolutive",
@@ -286,8 +286,8 @@ public class SimulationConfig implements Cloneable {
                                 0.01
                         )
                 )),
-                100,
-                0.05,
+                200,
+                0.01,
                 10,
                 false,
                 false,

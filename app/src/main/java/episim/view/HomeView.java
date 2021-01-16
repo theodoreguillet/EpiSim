@@ -11,6 +11,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import jfxtras.styles.jmetro.MDL2IconFont;
+import org.checkerframework.checker.units.qual.A;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -30,8 +31,12 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     private Slider modelChartScale;
 
     @FXML
+    private CheckBox pseudoSpatialisation;
+
+    @FXML
     private HBox modelsList;
-    private ArrayList<ModelSelect> modelsListControllers;
+    private ArrayList<Toggle> modelsListToggles;
+    private ToggleGroup modelsListToggleGroup;
 
     @FXML
     private Button addModelBtn;
@@ -123,6 +128,8 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
         });
         modelChartScale.valueProperty().set(modelChartScale.valueProperty().doubleValue());
 
+        pseudoSpatialisation.selectedProperty().bindBidirectional(viewModel.pseudoSpatialisation());
+
         simulationMode.getItems().setAll(
                 HomeViewModel.SIMULATION_SIMPLE,
                 HomeViewModel.SIMULATION_CENTER,
@@ -147,20 +154,27 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
 
     private void handleModelsChanged(ObservableList<String> models) {
         modelsList.getChildren().clear();
-        modelsListControllers = new ArrayList<>(models.size());
-        for(int i = 0; i < models.size(); i++) {
+        modelsListToggles = new ArrayList<>();
+        modelsListToggleGroup = new ToggleGroup();
+        modelsListToggleGroup.selectedToggleProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue == null) {
+                modelsListToggleGroup.selectToggle(modelsListToggles.get(viewModel.selectedModelId().get()));
+            } else {
+                for(int i = 0; i < modelsListToggles.size(); i++) {
+                    if(modelsListToggles.get(i) == newValue) {
+                        viewModel.selectedModelId().set(i);
+                    }
+                }
+            }
+        });
+        for (String model : models) {
             try {
                 var loader = ModelSelect.load();
                 modelsList.getChildren().add(loader.getRoot());
                 ModelSelect controller = loader.getController();
-                controller.setName(models.get(i));
-                modelsListControllers.add(controller);
-                final int modelId = i;
-                controller.selectedProperty().addListener((observable, oldValue, newValue) -> {
-                    if(newValue) {
-                        viewModel.selectedModelId().set(modelId);
-                    }
-                });
+                controller.setToggleGroup(modelsListToggleGroup);
+                controller.setName(model);
+                modelsListToggles.add(controller.getToggle());
             } catch (Exception err) {
                 // TODO: Report error to user
                 err.printStackTrace(System.err);
@@ -169,10 +183,8 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     }
 
     private void handleSelectedModelIdChanged(int modelId) {
-        if(modelsListControllers != null) {
-            for (int i = 0; i < modelsListControllers.size(); i++) {
-                modelsListControllers.get(i).selectedProperty().set(i == modelId);
-            }
+        if(modelsListToggleGroup != null) {
+            modelsListToggleGroup.selectToggle(modelsListToggles.get(modelId));
         }
     }
 

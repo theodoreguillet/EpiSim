@@ -13,20 +13,22 @@ import java.util.concurrent.atomic.AtomicReference;
  * La simulation de l'épidémie
  */
 public class Simulation {
-    public final int ZONE_SIZE = 100;
-    public final int QUARANTINE_SIZE = ZONE_SIZE / 4;
-    public final int ZONE_MAX_POP = 10000;
-    public final double INDIVIDUAL_SPEED = 1;
-    public final double INDIVIDUAL_DIRECTION_PROB = 0.05;
-    public final double CONTAMINATION_RADIUS = 10;
-    public final double MIN_CLOCK_SPEED = 30;
-    public final int STATS_UPDATE_DELAY = 100; // 100ms
+    public static final int ZONE_SIZE = 100;
+    public static final int QUARANTINE_SIZE = ZONE_SIZE / 4;
+    public static final int MAX_POP = 10000; // population a partir le laquelle les naissances ne se produisent pas
+    public static final double INDIVIDUAL_SPEED = 10; // Vitesse en distance par jours
+    public static final double TRAVELING_TIME = 2;
+    public static final double INDIVIDUAL_DIRECTION_PROB = 0.05;
+    public static final double CONTAMINATION_RADIUS = 10;
+    public static final double MIN_CLOCK_SPEED = 30;
+    public static final int STATS_UPDATE_DELAY = 100; // 100ms
 
     private final SimulationConfig config;
     private final int nzones;
     private final int susceptibleCompId;
     private final int infectiousCompId;
     private final int recoveredCompId;
+    private final int quarantineZoneId = -1;
 
     private double simulationSpeed = 1; // Vitesse de la simulation en jours par seconde
     private double clockSpeed = MIN_CLOCK_SPEED; // Nombre de mise à jours de la simulation par seconde
@@ -92,10 +94,14 @@ public class Simulation {
     }
 
     public synchronized void setSpeed(double speed) {
-        simulationSpeed = speed;
-        clockSpeed = Math.max(MIN_CLOCK_SPEED, speed);
-        task.cancel(false);
-        startExecutor();
+        if(started) {
+            simulationSpeed = speed;
+            clockSpeed = Math.max(MIN_CLOCK_SPEED, speed);
+            if(!paused) {
+                task.cancel(false);
+                startExecutor();
+            }
+        }
     }
 
     public synchronized double getSpeed() {
@@ -156,7 +162,7 @@ public class Simulation {
         ArrayList<TravelerState> travelers = new ArrayList<>();
         double time = 0;
 
-        var stats = new SimulationStats(new ArrayList<>(), 0);
+        var stats = new SimulationStats(new ArrayList<>(), 0, 0);
         stats = updateStats(stats, zones, quarantine, travelers, time);
 
         this.state.set(new SimulationState(zones, quarantine, travelers, time, stats));
@@ -177,14 +183,18 @@ public class Simulation {
         SimulationState lastState = state.get();
         double timeScale = simulationSpeed / clockSpeed;
         double time = lastState.time + timeScale;
-
-        var zones = new ArrayList<ZoneState>(nzones);
-        for(var lastZone : lastState.zones) {
-            zones.add(updateZone(timeScale, ZONE_SIZE, lastZone));
-        }
-        var quarantine = updateZone(timeScale, QUARANTINE_SIZE, lastState.quarantine);
+        boolean allowBirth = lastState.stats.totalPopulation < MAX_POP;
 
         ArrayList<TravelerState> travelers = new ArrayList<>();
+        ArrayList<TravelerState> arrived = new ArrayList<>();
+        updateTravelers(timeScale, lastState.travelers, travelers, arrived);
+
+        var zones = new ArrayList<ZoneState>(nzones);
+        for(int i = 0; i < lastState.zones.size(); i++) {
+            zones.add(updateZone(timeScale, ZONE_SIZE, i, allowBirth, travelers, arrived, lastState.zones.get(i)));
+        }
+        var quarantine = updateZone(timeScale, QUARANTINE_SIZE, quarantineZoneId, false,
+                travelers, arrived, lastState.quarantine);
 
         var stats = lastState.stats;
         if(System.currentTimeMillis() - lastStatsUpdate > STATS_UPDATE_DELAY) {
@@ -195,8 +205,11 @@ public class Simulation {
         this.state.set(new SimulationState(zones, quarantine, travelers, time, stats));
     }
 
-    private ZoneState updateZone(double timeScale, int zoneSize, ZoneState lastZone) {
-        ArrayList<IndividualState> individuals = new ArrayList<>(Math.min(2*lastZone.individuals.size(), ZONE_MAX_POP));
+    private ZoneState updateZone(double timeScale, int zoneSize, int zoneId, boolean allowBirth,
+                                 ArrayList<TravelerState> travelers, ArrayList<TravelerState> arrived,
+                                 ZoneState lastZone) {
+        ArrayList<IndividualState> individuals =
+                new ArrayList<>((allowBirth ? 2 * lastZone.individuals.size() : lastZone.individuals.size()) + arrived.size());
 
         // On met a jour chaque individu
         for(var lastInd : lastZone.individuals) {
@@ -220,18 +233,43 @@ public class Simulation {
 
             var pos = updatePos(timeScale, zoneSize, lastInd.posX, lastInd.posY, lastInd.direction);
 
-            individuals.add(new IndividualState(lastInd.uuid, compId, pos[0], pos[1], pos[2]));
+            boolean travel = false;
+            double dstX = 0, dstY = 0;
+            int dstZoneId = 0;
+
+            if(config.getQuarantine().isEnabled() && zoneId != quarantineZoneId && compId == infectiousCompId) {
+                if(rand.nextDouble() < config.getQuarantine().getRespectProb() * timeScale) {
+                    travel = true;
+                    dstZoneId = quarantineZoneId;
+                    dstX = (double)QUARANTINE_SIZE / 2.0;
+                    dstY = (double)QUARANTINE_SIZE / 2.0;
+                }
+            }
+
+            if(travel) {
+                travelers.add(new TravelerState(lastInd.uuid, compId, zoneId, pos[0], pos[1], pos[2],
+                        dstZoneId, dstX, dstY, 0));
+            } else {
+                individuals.add(new IndividualState(lastInd.uuid, compId, pos[0], pos[1], pos[2]));
+            }
         }
 
         // On ajoute les naissances
-        int i = 0;
-        while (i < lastZone.individuals.size() && individuals.size() < ZONE_MAX_POP) {
-            if(randBirth(timeScale)) {
-                // Un individu est né
-                individuals.add(randIndividual(false));
+        if(allowBirth) {
+            for(int i = 0; i < lastZone.individuals.size(); i++) {
+                if(randBirth(timeScale)) {
+                    // Un individu est né
+                    individuals.add(randIndividual(false));
+                }
             }
-            i++;
         }
+
+        // On ajoute les voyageurs arrivés
+        arrived.forEach(t -> {
+            if(t.dstZoneId == zoneId) {
+                individuals.add(t);
+            }
+        });
 
         return new ZoneState(individuals);
     }
@@ -260,10 +298,18 @@ public class Simulation {
     }
 
     private int updateComp(double timeScale, int compId, boolean metInfectious) {
-        if(compId != recoveredCompId && (compId != susceptibleCompId || !metInfectious)) {
+        if(compId != recoveredCompId) {
             double param = config.getSelectedModel().getCompartments().get(compId).getParam();
-            if(rand.nextDouble() < param * timeScale) {
-                return compId + 1;
+            if(compId == susceptibleCompId) {
+                if(metInfectious &&
+                        rand.nextDouble() < param * timeScale * INDIVIDUAL_SPEED
+                ) {
+                    return compId + 1;
+                }
+            } else {
+                if(rand.nextDouble() < param * timeScale) {
+                    return compId + 1;
+                }
             }
         }
         return compId;
@@ -293,6 +339,20 @@ public class Simulation {
         return pos;
     }
 
+    private void updateTravelers(double timeScale, List<TravelerState> lastTravelers,
+                                                     ArrayList<TravelerState> travelers, ArrayList<TravelerState> arrived) {
+        for(var trav : lastTravelers) {
+            double ratio = Math.min(trav.ratio + timeScale / TRAVELING_TIME, 1);
+            if(ratio < 1) {
+                travelers.add(new TravelerState(trav.uuid, trav.compartmentId, trav.zoneId, trav.posX,
+                        trav.posY, trav.direction, trav.dstZoneId, trav.dstX, trav.dstY, ratio));
+            } else {
+                arrived.add(new TravelerState(trav.uuid, trav.compartmentId, trav.zoneId, trav.dstX,
+                        trav.dstY, trav.direction, trav.dstZoneId, trav.dstX, trav.dstY, 1));
+            }
+        }
+    }
+
     private SimulationStats updateStats(SimulationStats stats, List<ZoneState> zones, ZoneState quarantine,
                                         List<TravelerState> travelers, double time
     ) {
@@ -300,6 +360,7 @@ public class Simulation {
         int ncomp = config.getSelectedModel().getCompartments().size();
         ArrayList<Double> populations = new ArrayList<>(ncomp);
 
+        double totalPopulation = 0;
         for(int compId = 0; compId < ncomp; compId++) {
             double value = 0;
             for(var zone : zones) {
@@ -309,13 +370,14 @@ public class Simulation {
             value += countInCompartment(travelers, compId);
 
             populations.add(value);
+            totalPopulation += value;
         }
 
         ArrayList<SimulationStatsPoint> points = new ArrayList<>(stats.points.size() + 1);
         points.addAll(stats.points);
-        points.add(new SimulationStatsPoint(time, populations));
+        points.add(new SimulationStatsPoint(time, populations, totalPopulation));
 
-        return new SimulationStats(points, time);
+        return new SimulationStats(points, time, totalPopulation);
     }
 
     private int countInCompartment(List<? extends IndividualState> individuals, int compId) {

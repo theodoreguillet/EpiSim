@@ -40,6 +40,7 @@ public class ModelChartGenerator{
     private int infectiousCompId;
     private int recoveredCompId;
     private double populationSize;
+    private double populationDiff;
 
     /**
      * Génère la courbe épidémique (sans spatialisation) d'un modèle.
@@ -109,16 +110,28 @@ public class ModelChartGenerator{
         double compOutPop = 0;
         ArrayList<Double> res = new ArrayList<>(ncomps);
 
+        boolean evolutive = (modelconfig.getDeath() - modelconfig.getBirth() != 0);
+
+        populationDiff = 0;
+        if(evolutive) {
+            populationSize = 0;
+            for(int i = 0; i < ncomps; i++) {
+                populationSize += y.get(i);
+            }
+        } else {
+            populationSize = initPopulationSize;
+        }
+
         for(int i = 0; i < ncomps; i++) {
             var comp = modelconfig.getCompartments().get(i);
             double compPop = y.get(i);
 
-            double death = -modelconfig.getDeath() * compPop;
+            double death = evolutive ? -modelconfig.getDeath() * compPop : 0;
             double birth = 0;
             double fval = compOutPop + death;
 
             if(i == susceptibleCompId) { // Susceptible
-                birth = modelconfig.getBirth() * populationSize;
+                birth = evolutive ? modelconfig.getBirth() * populationSize : 0;
                 fval += birth;
 
                 double infecPop = y.get(infectiousCompId);
@@ -127,7 +140,7 @@ public class ModelChartGenerator{
                 compOutPop = comp.getParam() * compPop;
             }
             fval -= compOutPop;
-            populationSize += birth - death;
+            populationDiff += birth - death;
 
             res.add(fval);
         }
@@ -135,10 +148,10 @@ public class ModelChartGenerator{
         return res;
     }
 
-    private List<Double> valueLimiter(List<Double> y) {
+    private List<Double> valueLimiter(double dt, List<Double> y) {
         ArrayList<Double> res = new ArrayList<>(y.size());
         for(double val : y) {
-            res.add(Math.max(0, Math.min(val, populationSize)));
+            res.add(Math.max(0, Math.min(val, populationSize + populationDiff * dt)));
         }
         return res;
     }

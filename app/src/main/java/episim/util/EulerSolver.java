@@ -11,7 +11,7 @@ public abstract class EulerSolver {
         List<Double> compute(double t, List<Double> y);
     }
     public interface ValueLimit {
-        List<Double> limit(List<Double> y);
+        List<Double> limit(double dt, List<Double> y);
     }
     public static class Data {
         private final double x;
@@ -53,7 +53,7 @@ public abstract class EulerSolver {
 
             List<Double> y1 = add(y, mul(dt, func.compute(t, y)));
 
-            y1 = limiter.limit(y1);
+            y1 = limiter.limit(dt, y1);
 
             double t1 = dt * (double)(n + 1);
             data.add(new Data(t1, y1));

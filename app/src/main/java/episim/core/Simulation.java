@@ -1,6 +1,7 @@
 package episim.core;
 
 import episim.util.MathUtils;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +20,7 @@ public class Simulation {
     public final double INDIVIDUAL_DIRECTION_PROB = 0.05;
     public final double CONTAMINATION_RADIUS = 10;
     public final double MIN_CLOCK_SPEED = 30;
+    public final int STATS_UPDATE_DELAY = 100; // 100ms
 
     private final SimulationConfig config;
     private final int nzones;
@@ -28,6 +30,7 @@ public class Simulation {
 
     private double simulationSpeed = 1; // Vitesse de la simulation en jours par seconde
     private double clockSpeed = MIN_CLOCK_SPEED; // Nombre de mise à jours de la simulation par seconde
+    private long lastStatsUpdate = 0;
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
     private final AtomicReference<SimulationState> state = new AtomicReference<>(null);
@@ -150,7 +153,13 @@ public class Simulation {
             individuals.get(zoneIdx).add(randIndividual(i < popInfected));
         }
         var quarantine = new ZoneState(new ArrayList<>());
-        state.set(new SimulationState(zones, quarantine, new ArrayList<>()));
+        ArrayList<TravelerState> travelers = new ArrayList<>();
+        double time = 0;
+
+        var stats = new SimulationStats(new ArrayList<>(), 0);
+        stats = updateStats(stats, zones, quarantine, travelers, time);
+
+        this.state.set(new SimulationState(zones, quarantine, travelers, time, stats));
     }
 
     private IndividualState randIndividual(boolean infectious) {
@@ -167,6 +176,7 @@ public class Simulation {
     private void updateState() {
         SimulationState lastState = state.get();
         double timeScale = simulationSpeed / clockSpeed;
+        double time = lastState.time + timeScale;
 
         var zones = new ArrayList<ZoneState>(nzones);
         for(var lastZone : lastState.zones) {
@@ -176,11 +186,17 @@ public class Simulation {
 
         ArrayList<TravelerState> travelers = new ArrayList<>();
 
-        state.set(new SimulationState(zones, quarantine, travelers));
+        var stats = lastState.stats;
+        if(System.currentTimeMillis() - lastStatsUpdate > STATS_UPDATE_DELAY) {
+            stats = updateStats(stats, zones, quarantine, travelers, time);
+            lastStatsUpdate = System.currentTimeMillis();
+        }
+
+        this.state.set(new SimulationState(zones, quarantine, travelers, time, stats));
     }
 
     private ZoneState updateZone(double timeScale, int zoneSize, ZoneState lastZone) {
-        ArrayList<IndividualState> individuals = new ArrayList<>();
+        ArrayList<IndividualState> individuals = new ArrayList<>(Math.min(2*lastZone.individuals.size(), ZONE_MAX_POP));
 
         // On met a jour chaque individu
         for(var lastInd : lastZone.individuals) {
@@ -275,5 +291,40 @@ public class Simulation {
             return move(zoneSize, posX, posY, -direction, speed);
         }
         return pos;
+    }
+
+    private SimulationStats updateStats(SimulationStats stats, List<ZoneState> zones, ZoneState quarantine,
+                                        List<TravelerState> travelers, double time
+    ) {
+
+        int ncomp = config.getSelectedModel().getCompartments().size();
+        ArrayList<Double> populations = new ArrayList<>(ncomp);
+
+        for(int compId = 0; compId < ncomp; compId++) {
+            double value = 0;
+            for(var zone : zones) {
+                value += countInCompartment(zone.individuals, compId);
+            }
+            value += countInCompartment(quarantine.individuals, compId);
+            value += countInCompartment(travelers, compId);
+
+            populations.add(value);
+        }
+
+        ArrayList<SimulationStatsPoint> points = new ArrayList<>(stats.points.size() + 1);
+        points.addAll(stats.points);
+        points.add(new SimulationStatsPoint(time, populations));
+
+        return new SimulationStats(points, time);
+    }
+
+    private int countInCompartment(List<? extends IndividualState> individuals, int compId) {
+        int count = 0;
+        for(var ind : individuals) {
+            if(ind.compartmentId == compId) {
+                count++;
+            }
+        }
+        return count;
     }
 }

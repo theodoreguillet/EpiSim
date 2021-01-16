@@ -2,7 +2,9 @@ package episim.view;
 
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
+import episim.view.component.ModelChart;
 import javafx.animation.AnimationTimer;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Point2D;
@@ -30,7 +32,9 @@ public class SimulationView implements FxmlView<SimulationViewModel>, Initializa
     @FXML
     private Pane simulationChartContainer;
     @FXML
-    private LineChart<Double, Double> simulationChart;
+    private LineChart<Number, Number> simulationChart;
+    @FXML
+    private ModelChart simulationChartController;
     @FXML
     private Pane simulationCanvasContainer;
     @FXML
@@ -77,13 +81,15 @@ public class SimulationView implements FxmlView<SimulationViewModel>, Initializa
             drawSimulation();
         });
 
-        simulationChart.setMinHeight(100);
-        simulationChart.setMinWidth(100);
         simulationChart.heightProperty().addListener((observable, oldValue, newValue) -> {
-            simulationChart.setPrefWidth(3 * newValue.doubleValue());
+            simulationChart.setPrefWidth(4 * newValue.doubleValue());
         });
         simulationChart.prefHeightProperty().bind(simulationChartContainer.heightProperty());
         simulationChart.maxWidthProperty().bind(simulationChartHBox.widthProperty());
+
+        simulationChart.setMinHeight(100);
+        simulationChart.setMinWidth(100);
+        simulationChart.setPrefWidth(4 * simulationChart.prefHeightProperty().get());
 
         simulationSpeed.valueProperty().bindBidirectional(viewModel.simulationSpeed());
         simulationSpeed.valueProperty().addListener((observable, oldValue, newValue) -> {
@@ -95,6 +101,11 @@ public class SimulationView implements FxmlView<SimulationViewModel>, Initializa
             handlePausedChanged();
         });
         handlePausedChanged();
+
+        viewModel.simulationChart().addListener((ListChangeListener.Change<? extends ModelChart.Chart> c) -> {
+            simulationChartController.dataProperty().setAll(viewModel.simulationChart());
+        });
+        simulationChartController.dataProperty().setAll(viewModel.simulationChart());
 
         saveButton.setGraphic(new MDL2IconFont("\uE74E"));
 

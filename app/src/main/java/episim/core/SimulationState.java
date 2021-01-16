@@ -19,10 +19,22 @@ public class SimulationState {
      * Les individus voyageant
      */
     public final List<TravelerState> travelers;
+    /**
+     * Le temps de la simulation en jours
+     */
+    public final double time;
+    /**
+     * Les statistiques de la simulation
+     */
+    public final SimulationStats stats;
 
-    public SimulationState(List<ZoneState> zones, ZoneState quarantine, List<TravelerState> travelers) {
+    public SimulationState(List<ZoneState> zones, ZoneState quarantine, List<TravelerState> travelers, double time,
+                           SimulationStats stats
+    ) {
         this.zones = Collections.unmodifiableList(zones);
         this.quarantine = quarantine;
         this.travelers = Collections.unmodifiableList(travelers);
+        this.time = time;
+        this.stats = stats;
     }
 }

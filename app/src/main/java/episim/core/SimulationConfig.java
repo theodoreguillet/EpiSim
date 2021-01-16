@@ -113,7 +113,7 @@ public class SimulationConfig implements Cloneable {
             File file = new File(path);
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
             oos.writeObject(this);
-        } catch (Exception err) {
+        } catch (IOException err) {
             // TODO: Report error to user
             err.printStackTrace(System.err);
         }

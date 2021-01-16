@@ -35,6 +35,9 @@
                            </BorderPane.margin>
                         </Slider>
                      </right>
+                     <padding>
+                        <Insets top="5.0" />
+                     </padding>
                   </BorderPane>
                   <VBox spacing="20.0">
                      <children>

@@ -2,14 +2,14 @@ package episim.view;
 
 import de.saxsys.mvvmfx.InjectScope;
 import de.saxsys.mvvmfx.ViewModel;
-import episim.core.CompartmentConfig;
-import episim.core.Simulation;
-import episim.core.SimulationState;
-import episim.core.ZoneState;
+import episim.core.*;
+import episim.view.component.ModelChart;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
@@ -60,6 +60,8 @@ public class SimulationViewModel implements ViewModel {
     private final DoubleProperty simulationSpeed = new SimpleDoubleProperty(1);
     private final BooleanProperty simulationPaused = new SimpleBooleanProperty(false);
 
+    private final ObservableList<ModelChart.Chart> simulationChart = FXCollections.observableArrayList();
+
     public void initialize() {
         simulation = new Simulation(configScope.simulationConfig());
 
@@ -80,7 +82,9 @@ public class SimulationViewModel implements ViewModel {
         });
 
         simulation.start();
-        createSimulationWorld(simulation.getState());
+        var state = simulation.getState();
+        createSimulationWorld(state);
+        updateSimulationChart(state);
 
         simulationSpeed.set(10);
     }
@@ -98,6 +102,12 @@ public class SimulationViewModel implements ViewModel {
         var state = simulation.getState();
 
         updateSimulationPoints(state);
+
+        if(simulationChart.isEmpty() ||
+                state.stats.points.size() != simulationChart.get(0).getXdata().size()
+        ) {
+            updateSimulationChart(state);
+        }
     }
 
     public DoubleProperty simulationSpeed() {
@@ -106,6 +116,10 @@ public class SimulationViewModel implements ViewModel {
 
     public BooleanProperty simulationPaused() {
         return simulationPaused;
+    }
+
+    public ObservableList<ModelChart.Chart> simulationChart() {
+        return simulationChart;
     }
 
     public List<Zone> getZones() {
@@ -198,5 +212,23 @@ public class SimulationViewModel implements ViewModel {
                 points.add(point);
             }
         }
+    }
+
+    private void updateSimulationChart(SimulationState state) {
+        ArrayList<ModelChart.Chart> charts = new ArrayList<>();
+        var comps = configScope.simulationConfig().getSelectedModel().getCompartments();
+        for(int i = 0; i < comps.size(); i++) {
+            var comp = comps.get(i);
+            ArrayList<Double> xdata = new ArrayList<>(state.stats.points.size());
+            ArrayList<Double> ydata = new ArrayList<>(state.stats.points.size());
+
+            for(var point : state.stats.points) {
+                xdata.add(point.time);
+                ydata.add(point.populations.get(i));
+            }
+
+            charts.add(new ModelChart.Chart(xdata, ydata, comp.getName(), Color.valueOf(comp.getColor())));
+        }
+        simulationChart.setAll(charts);
     }
 }

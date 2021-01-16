@@ -10,6 +10,8 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
+import javafx.util.StringConverter;
+
 import java.net.URL;
 import java.util.*;
 
@@ -29,6 +31,10 @@ public class ModelChart implements Initializable {
             this.name = name;
             this.color = color;
         }
+        public List<Double> getXdata() { return Collections.unmodifiableList(xdata); }
+        public List<Double> getYdata() { return Collections.unmodifiableList(ydata); }
+        public String getName() { return name; }
+        public Color getColor() { return color; }
     }
 
     @FXML
@@ -66,10 +72,26 @@ public class ModelChart implements Initializable {
             // node.setStyle(node.getStyle() + "-fx-fill: rgba(" + rgbColor + ", 0.15);");
         }
 
+        var labelFormater = new StringConverter<Number>() {
+            @Override
+            public String toString(Number object) {
+                return Integer.toString(Math.round(object.floatValue()));
+            }
+
+            @Override
+            public Number fromString(String string) {
+                return Integer.valueOf(string);
+            }
+        };
+
         var yaxis = (NumberAxis)modelChart.getYAxis();
-        yaxis.setUpperBound(Math.ceil(maxy));
+        yaxis.setUpperBound(maxy);
+        yaxis.setTickLabelsVisible(true);
+        yaxis.setTickLabelFormatter(labelFormater);
+
         var xaxis = (NumberAxis)modelChart.getXAxis();
-        xaxis.setUpperBound(Math.ceil(maxx));
+        xaxis.setUpperBound(maxx);
+        xaxis.setTickLabelFormatter(labelFormater);
     }
 
     @Override

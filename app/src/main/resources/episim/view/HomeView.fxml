@@ -119,7 +119,7 @@
                         </VBox>
                         <VBox spacing="5.0">
                            <children>
-                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Distance de contamination" />
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Distance minimum de contamination" />
                               <fx:include fx:id="infecRadius" source="component/SpinnerSlider.fxml" />
                            </children>
                         </VBox>
@@ -175,7 +175,17 @@
                         </TitledPane>
                       <TitledPane animated="false" expanded="false" text="Port du masque">
                            <content>
-                              <fx:include fx:id="maskWearRule" source="component/EpidemicRule.fxml" />
+                              <VBox>
+                                 <children>
+                                    <VBox fx:id="multiZoneTravelProbContainer1" spacing="5.0">
+                                       <children>
+                                          <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Pourcentage d'efficacité" />
+                                          <fx:include fx:id="maskWearEfficacity" source="component/SpinnerSlider.fxml" />
+                                       </children>
+                                    </VBox>
+                                    <fx:include fx:id="maskWearRule" source="component/EpidemicRule.fxml" />
+                                 </children>
+                              </VBox>
                            </content>
                         </TitledPane>
                         <TitledPane animated="false" expanded="false" text="Quarantaine">
@@ -185,7 +195,17 @@
                         </TitledPane>
                         <TitledPane animated="false" expanded="false" text="Distanciation sociale">
                            <content>
-                              <fx:include fx:id="socialDistancingRule" source="component/EpidemicRule.fxml" />
+                              <VBox>
+                                 <children>
+                                    <VBox fx:id="multiZoneTravelProbContainer11" spacing="5.0">
+                                       <children>
+                                          <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Pourcentage de distance" />
+                                          <fx:include fx:id="socialDistancingPct" source="component/SpinnerSlider.fxml" />
+                                       </children>
+                                    </VBox>
+                                    <fx:include fx:id="socialDistancingRule" source="component/EpidemicRule.fxml" />
+                                 </children>
+                              </VBox>
                            </content>
                         </TitledPane>
                     </panes>

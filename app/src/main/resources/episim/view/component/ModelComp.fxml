@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.Group?>
+<?import javafx.scene.control.ColorPicker?>
 <?import javafx.scene.control.Spinner?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.shape.Line?>
@@ -10,10 +12,14 @@
 
 <Group fx:id="mainContainer" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="episim.view.component.ModelComp">
     <children>
-        <StackPane minHeight="-Infinity">
+        <StackPane fx:id="colorPane" onMouseEntered="#onColorPaneMouseEntered" onMouseExited="#onColorPaneMouseExited">
             <children>
-                <Rectangle fx:id="rectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="30.0" stroke="BLACK" strokeType="INSIDE" width="30.0" />
-                <Text fx:id="name" strokeType="OUTSIDE" strokeWidth="0.0" text="S">
+            <ColorPicker fx:id="colorPicker" maxHeight="28.0" maxWidth="28.0" minHeight="28.0" minWidth="28.0" prefHeight="28.0" prefWidth="28.0">
+               <StackPane.margin>
+                  <Insets />
+               </StackPane.margin></ColorPicker>
+                <Rectangle fx:id="rectangle" arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="30.0" mouseTransparent="true" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.5" width="30.0" />
+                <Text fx:id="name" mouseTransparent="true" strokeType="OUTSIDE" strokeWidth="0.0" text="S">
                     <font>
                         <Font size="14.0" />
                     </font>

@@ -56,6 +56,10 @@ public class SimulationConfig implements Cloneable {
      */
     private SimulationRuleConfig maskWear;
     /**
+     * Facteur d'efficacité du masque
+     */
+    private double maskWearEfficacity;
+    /**
      * Règle de mise en quarantaine des individus infectieux
      */
     private SimulationRuleConfig quarantine;
@@ -63,6 +67,10 @@ public class SimulationConfig implements Cloneable {
      * Règle de distantiation sociale (par rapport à {@link #infectionRadius la distance distance de contamination})
      */
     private SimulationRuleConfig socialDistancing;
+    /**
+     * Facteur de distantiation (par rapport à la distance de contamination)
+     */
+    private double socialDistancingFactor;
 
 
     SimulationConfig() {
@@ -78,13 +86,16 @@ public class SimulationConfig implements Cloneable {
         this.multiZoneTravelProb = 0;
         this.confinement = new SimulationRuleConfig();
         this.maskWear = new SimulationRuleConfig();
+        this.maskWearEfficacity = 0;
         this.quarantine = new SimulationRuleConfig();
         this.socialDistancing = new SimulationRuleConfig();
+        this.socialDistancingFactor = 0;
     }
     SimulationConfig(ArrayList<ModelConfig> models, int populationSize, double initialInfectious, double infectionRadius,
                      boolean enableCenterZone, boolean enableMultiZone, double centerZoneEnterProb, double centerZoneExitProb,
                      double multiZoneTravelProb, SimulationRuleConfig confinement, SimulationRuleConfig maskWear,
-                     SimulationRuleConfig quarantine, SimulationRuleConfig socialDistancing
+                     double maskWearEfficacity, SimulationRuleConfig quarantine, SimulationRuleConfig socialDistancing,
+                     double socialDistancingFactor
     ) {
         this.models = models;
         this.selectedModelId = 0;
@@ -98,8 +109,10 @@ public class SimulationConfig implements Cloneable {
         this.multiZoneTravelProb = multiZoneTravelProb;
         this.confinement = confinement;
         this.maskWear = maskWear;
+        this.maskWearEfficacity = maskWearEfficacity;
         this.quarantine = quarantine;
         this.socialDistancing = socialDistancing;
+        this.socialDistancingFactor = socialDistancingFactor;
     }
 
     public static SimulationConfig load(String path) {
@@ -248,6 +261,14 @@ public class SimulationConfig implements Cloneable {
         this.maskWear = maskWear;
     }
 
+    public double getMaskWearEfficacity() {
+        return maskWearEfficacity;
+    }
+
+    public void setMaskWearEfficacity(double maskWearEfficacity) {
+        this.maskWearEfficacity = maskWearEfficacity;
+    }
+
     public SimulationRuleConfig getQuarantine() {
         return quarantine;
     }
@@ -263,6 +284,15 @@ public class SimulationConfig implements Cloneable {
     public void setSocialDistancing(SimulationRuleConfig socialDistancing) {
         this.socialDistancing = socialDistancing;
     }
+
+    public double getSocialDistancingFactor() {
+        return socialDistancingFactor;
+    }
+
+    public void setSocialDistancingFactor(double socialDistancingFactor) {
+        this.socialDistancingFactor = socialDistancingFactor;
+    }
+
 
     public static SimulationConfig getDefault() {
         return new SimulationConfig(
@@ -310,8 +340,10 @@ public class SimulationConfig implements Cloneable {
                 0.03,
                 new SimulationRuleConfig(),
                 new SimulationRuleConfig(),
+                0,
                 new SimulationRuleConfig(),
-                new SimulationRuleConfig()
+                new SimulationRuleConfig(),
+                0
         );
     }
 }

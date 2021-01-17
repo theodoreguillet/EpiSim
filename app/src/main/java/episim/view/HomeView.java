@@ -90,9 +90,13 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     @FXML
     private EpidemicRule maskWearRuleController;
     @FXML
+    private SpinnerSlider maskWearEfficacityController;
+    @FXML
     private EpidemicRule quarantineRuleController;
     @FXML
     private EpidemicRule socialDistancingRuleController;
+    @FXML
+    private SpinnerSlider socialDistancingPctController;
 
     @FXML
     private void onStartSimulationAction() {
@@ -184,12 +188,14 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
         confinementRuleController.respectProperty().bindBidirectional(viewModel.confinementRespect());
         confinementRuleController.delayProperty().bindBidirectional(viewModel.confinementDelay());
 
+        maskWearEfficacityController.valueProperty().bindBidirectional(viewModel.maskWearEfficacity());
         maskWearRuleController.respectProperty().bindBidirectional(viewModel.maskWearRespect());
         maskWearRuleController.delayProperty().bindBidirectional(viewModel.maskWearDelay());
 
         quarantineRuleController.respectProperty().bindBidirectional(viewModel.quarantineRespect());
         quarantineRuleController.delayProperty().bindBidirectional(viewModel.quarantineDelay());
 
+        socialDistancingPctController.valueProperty().bindBidirectional(viewModel.socialDistancingPct());
         socialDistancingRuleController.respectProperty().bindBidirectional(viewModel.socialDistancingRespect());
         socialDistancingRuleController.delayProperty().bindBidirectional(viewModel.socialDistancingDelay());
 

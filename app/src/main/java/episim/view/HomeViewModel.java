@@ -65,10 +65,12 @@ public class HomeViewModel implements ViewModel {
     private final DoubleProperty multiZoneTravelProb = new SimpleDoubleProperty(0);
     private final DoubleProperty confinementRespect = new SimpleDoubleProperty(0);
     private final DoubleProperty confinementDelay = new SimpleDoubleProperty(0);
+    private final DoubleProperty maskWearEfficacity = new SimpleDoubleProperty(0);
     private final DoubleProperty maskWearRespect = new SimpleDoubleProperty(0);
     private final DoubleProperty maskWearDelay = new SimpleDoubleProperty(0);
     private final DoubleProperty quarantineRespect = new SimpleDoubleProperty(0);
     private final DoubleProperty quarantineDelay = new SimpleDoubleProperty(0);
+    private final DoubleProperty socialDistancingPct = new SimpleDoubleProperty(0);
     private final DoubleProperty socialDistancingRespect = new SimpleDoubleProperty(0);
     private final DoubleProperty socialDistancingDelay = new SimpleDoubleProperty(0);
 
@@ -144,6 +146,9 @@ public class HomeViewModel implements ViewModel {
     public DoubleProperty confinementDelay() {
         return confinementDelay;
     }
+    public DoubleProperty maskWearEfficacity() {
+        return maskWearEfficacity;
+    }
     public DoubleProperty maskWearRespect() {
         return maskWearRespect;
     }
@@ -155,6 +160,9 @@ public class HomeViewModel implements ViewModel {
     }
     public DoubleProperty quarantineDelay() {
         return quarantineDelay;
+    }
+    public DoubleProperty socialDistancingPct() {
+        return socialDistancingPct;
     }
     public DoubleProperty socialDistancingRespect() {
         return socialDistancingRespect;
@@ -229,6 +237,9 @@ public class HomeViewModel implements ViewModel {
             configScope.simulationConfig().getConfinement().setDelay(newValue.doubleValue());
         });
 
+        maskWearEfficacity.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().setMaskWearEfficacity(newValue.doubleValue() / 100.0);
+        });
         maskWearRespect.addListener((observable, oldValue, newValue) -> {
             configScope.simulationConfig().getMaskWear().setRespectProb(newValue.doubleValue() / 100.0);
         });
@@ -243,6 +254,9 @@ public class HomeViewModel implements ViewModel {
             configScope.simulationConfig().getQuarantine().setDelay(newValue.doubleValue());
         });
 
+        socialDistancingPct.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().setSocialDistancingFactor(newValue.doubleValue() / 100.0);
+        });
         socialDistancingRespect.addListener((observable, oldValue, newValue) -> {
             configScope.simulationConfig().getSocialDistancing().setRespectProb(newValue.doubleValue() / 100.0);
         });
@@ -312,9 +326,11 @@ public class HomeViewModel implements ViewModel {
         quarantineRespect.set(config.getQuarantine().getRespectProb() * 100.0);
         quarantineDelay.set(config.getQuarantine().getDelay());
 
+        maskWearEfficacity.set(config.getMaskWearEfficacity() * 100.0);
         maskWearRespect.set(config.getMaskWear().getRespectProb() * 100.0);
         maskWearDelay.set(config.getMaskWear().getDelay());
 
+        socialDistancingPct.set(config.getSocialDistancingFactor() * 100.0);
         socialDistancingRespect.set(config.getSocialDistancing().getRespectProb() * 100.0);
         socialDistancingDelay.set(config.getSocialDistancing().getDelay());
     }

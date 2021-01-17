@@ -7,6 +7,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Group;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.paint.Color;
@@ -40,6 +41,9 @@ public class ModelComp implements Initializable {
     private Text name;
 
     @FXML
+    private ColorPicker colorPicker;
+
+    @FXML
     private Spinner<Double> spinner;
     private SpinnerWrapper spinnerWrapper;
 
@@ -52,6 +56,18 @@ public class ModelComp implements Initializable {
     @FXML
     private Group spinnerContainer;
 
+    @FXML
+    private void onColorPaneMouseEntered() {
+        rectangle.setStroke(Color.BLACK);
+        rectangle.setStrokeWidth(1);
+    }
+
+    @FXML
+    private void onColorPaneMouseExited() {
+        rectangle.setStroke(Color.BLACK);
+        rectangle.setStrokeWidth(0.5);
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         spinnerWrapper = new SpinnerWrapper(spinner, 0, 10, 0.5, 0.01);
@@ -59,10 +75,13 @@ public class ModelComp implements Initializable {
         valueFactory.setConverter(new StringDoubleConverter());
         spinner.setValueFactory(valueFactory);
 
+        colorPicker.valueProperty().bindBidirectional(color);
         color.addListener((observable, oldValue, newValue) -> {
             setCompColor(newValue);
         });
         setCompColor(color.get());
+
+        rectangle.setStrokeWidth(0.5);
     }
 
     /**

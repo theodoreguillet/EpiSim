@@ -221,7 +221,7 @@ public class Simulation {
             }
 
             // On applique les règles sanitaire
-            lastInd = updateIndividualComportment(time, lastInd);
+            lastInd = updateIndividualComportment(timeScale, time, lastInd);
 
             // On met à jour le compartiment
             int compId = updateCompartment(timeScale, lastInd, hasMetInfectious(lastInd, lastZone.individuals));
@@ -338,13 +338,20 @@ public class Simulation {
         return (rand.nextDouble() < param * timeScale);
     }
 
-    private IndividualState updateIndividualComportment(double time, IndividualState lastInd) {
+    private IndividualState updateIndividualComportment(double timeScale, double time, IndividualState lastInd) {
+        // On vaccine une proportion de la population saine chaque jour
+        boolean vaccine = (lastInd.compartmentId == susceptibleCompId &&
+                time >= config.getVaccination().getDelay() &&
+                rand.nextDouble() < config.getVaccination().getRespectProb() * timeScale
+        );
+        // On applique les autres règles, le respect ou non est déterminé une fois pour chaque individu
         return new IndividualState(lastInd.uuid, lastInd.compartmentId, lastInd.posX, lastInd.posY, lastInd.direction,
                 randRuleRespect(time, config.getConfinement(), lastInd.confinement),
                 randRuleRespect(time, config.getMaskWear(), lastInd.maskWear),
                 randRuleRespect(time, config.getQuarantine(), lastInd.quarantine),
                 randRuleRespect(time, config.getSocialDistancing(), lastInd.socialDistancing),
-                randRuleRespect(time, config.getVaccination(), lastInd.vaccination)
+                vaccine && lastInd.vaccination == IndividualState.Respect.UNSET
+                        ? IndividualState.Respect.TRUE : lastInd.vaccination
         );
     }
 

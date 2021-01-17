@@ -37,12 +37,23 @@ public class MathUtils {
     }
 
     /**
-     * Retourne un angle modulo 2pi compris entre -pi et pi
+     * Calcule le modulo x % y pour des nombres flottant de la même manière que {@code Math.floorMod}
+     */
+    public static double floatMod(double x, double y){
+        return (x - Math.floor(x/y) * y);
+    }
+
+    /**
+     * Retourne un angle modulo 2pi compris entre -pi (exclus) et pi (inclus)
      * @param angle Un angle en radian
-     * @return Un angle compris entre -pi et pi
+     * @return Un angle compris entre -pi (exclus) et pi (inclus)
      */
     public static double angleMod(double angle) {
-        return (angle % (2 * Math.PI)) - Math.PI;
+        angle = floatMod(angle, 2 * Math.PI);
+        if(angle > Math.PI) {
+            angle = angle - (2 * Math.PI);
+        }
+        return angle;
     }
 
     /**

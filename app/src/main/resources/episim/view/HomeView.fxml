@@ -193,7 +193,12 @@
                               <fx:include fx:id="quarantineRule" source="component/EpidemicRule.fxml" />
                            </content>
                         </TitledPane>
-                        <TitledPane animated="false" expanded="false" text="Distanciation sociale">
+                        <TitledPane animated="false" expanded="false" text="Vaccination">
+                           <content>
+                              <fx:include fx:id="vaccinationRule" source="component/EpidemicRule.fxml" />
+                           </content>
+                        </TitledPane>
+                        <TitledPane animated="false" expanded="false" text="Distanciation sociale" visible="false">
                            <content>
                               <VBox>
                                  <children>

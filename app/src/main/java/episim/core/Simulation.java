@@ -174,7 +174,7 @@ public class Simulation {
         int compId = infectious ? infectiousCompId : susceptibleCompId;
         double posX = rand.nextInt(ZONE_SIZE);
         double posY = rand.nextInt(ZONE_SIZE);
-        var direction = (rand.nextDouble() - 2) * Math.PI;
+        var direction = Math.PI * (rand.nextDouble() * 2 -1);
         return new IndividualState(compId, posX, posY, direction);
     }
 
@@ -220,25 +220,14 @@ public class Simulation {
                 continue;
             }
 
-            int compId = updateComp(
-                    timeScale,
-                    lastInd.compartmentId,
-                    hasMetInfectious(lastInd, lastZone.individuals)
-            );
+            // On applique les règles sanitaire
+            lastInd = updateIndividualComportment(time, lastInd);
 
-            double direction = lastInd.direction;
-            if(rand.nextDouble() < INDIVIDUAL_DIRECTION_PROB * timeScale) {
-                direction = MathUtils.angleMod(
-                        lastInd.direction + (rand.nextDouble() - 2) * Math.PI/2
-                );
-            }
+            // On met à jour le compartiment
+            int compId = updateCompartment(timeScale, lastInd, hasMetInfectious(lastInd, lastZone.individuals));
 
-            // On bouge si on n'est pas dans la zone centrale
-            boolean inCenterZone = isInCenterZone(lastInd.posX, lastInd.posY);
-            double[] pos = { lastInd.posX, lastInd.posY, direction };
-            if(!inCenterZone) {
-                pos = updatePos(timeScale, zoneSize, lastInd.posX, lastInd.posY, lastInd.direction);
-            }
+            // On met à jour la position
+            var pos = updatePos(timeScale, zoneSize, lastInd);
 
             boolean travel = false;
             double dstX = 0, dstY = 0;
@@ -246,10 +235,8 @@ public class Simulation {
 
             // On applique les règles sanitaire et comportements
             if(zoneId != QUARANTINE_ZONE_ID) {
-                if(isRuleEnabled(config.getQuarantine(), time) && compId == infectiousCompId) {
-                    if(config.getQuarantine().getRespectProb() == 1 ||
-                            rand.nextDouble() < config.getQuarantine().getRespectProb() * timeScale
-                    ) {
+                if(compId == infectiousCompId) {
+                    if(isRespectRule(lastInd.quarantine)) {
                         travel = true;
                         dstZoneId = QUARANTINE_ZONE_ID;
                         dstX = (double)QUARANTINE_SIZE / 2.0;
@@ -265,7 +252,7 @@ public class Simulation {
                     }
                 }
                 if(!travel && config.isEnableCenterZone()) {
-                    if(inCenterZone) {
+                    if(isInCenterZone(lastInd.posX, lastInd.posY)) {
                         if(rand.nextDouble() < config.getCenterZoneExitProb() * timeScale) {
                             travel = true;
                             dstZoneId = zoneId;
@@ -287,9 +274,13 @@ public class Simulation {
 
             if(travel) {
                 travelers.add(new TravelerState(lastInd.uuid, compId, zoneId, pos[0], pos[1], pos[2],
-                        dstZoneId, dstX, dstY, 0));
+                        dstZoneId, dstX, dstY, 0,
+                        lastInd.confinement, lastInd.maskWear, lastInd.quarantine,
+                        lastInd.socialDistancing, lastInd.vaccination));
             } else {
-                individuals.add(new IndividualState(lastInd.uuid, compId, pos[0], pos[1], pos[2]));
+                individuals.add(new IndividualState(lastInd.uuid, compId, pos[0], pos[1], pos[2],
+                        lastInd.confinement, lastInd.maskWear, lastInd.quarantine,
+                        lastInd.socialDistancing, lastInd.vaccination));
             }
         }
 
@@ -317,10 +308,6 @@ public class Simulation {
         return config.isEnableCenterZone() &&
                 posX >= ZONE_CENTER_X && posY >= ZONE_CENTER_Y &&
                 posX < ZONE_CENTER_X + ZONE_CENTER_SIZE && posY < ZONE_CENTER_Y + ZONE_CENTER_SIZE;
-    }
-
-    private boolean isRuleEnabled(SimulationRuleConfig rule, double time) {
-        return rule.getRespectProb() > 0 && time >= rule.getDelay();
     }
 
     private boolean hasMetInfectious(IndividualState ind, List<IndividualState> others) {
@@ -351,62 +338,117 @@ public class Simulation {
         return (rand.nextDouble() < param * timeScale);
     }
 
-    private int updateComp(double timeScale, int compId, boolean metInfectious) {
-        if(compId != recoveredCompId) {
-            double param = config.getSelectedModel().getCompartments().get(compId).getParam();
-            if(compId == susceptibleCompId) {
+    private IndividualState updateIndividualComportment(double time, IndividualState lastInd) {
+        return new IndividualState(lastInd.uuid, lastInd.compartmentId, lastInd.posX, lastInd.posY, lastInd.direction,
+                randRuleRespect(time, config.getConfinement(), lastInd.confinement),
+                randRuleRespect(time, config.getMaskWear(), lastInd.maskWear),
+                randRuleRespect(time, config.getQuarantine(), lastInd.quarantine),
+                randRuleRespect(time, config.getSocialDistancing(), lastInd.socialDistancing),
+                randRuleRespect(time, config.getVaccination(), lastInd.vaccination)
+        );
+    }
+
+    private IndividualState.Respect randRuleRespect(double time, SimulationRuleConfig rule, IndividualState.Respect lastVal) {
+        if(lastVal == IndividualState.Respect.UNSET && time >= rule.getDelay()) {
+            return rand.nextDouble() < rule.getRespectProb()
+                    ? IndividualState.Respect.TRUE
+                    : IndividualState.Respect.FALSE;
+        } else {
+            return lastVal;
+        }
+    }
+
+    private boolean isRespectRule(IndividualState.Respect respectRule) {
+        return respectRule == IndividualState.Respect.TRUE;
+    }
+
+    private int updateCompartment(double timeScale, IndividualState lastInd, boolean metInfectious) {
+        if(lastInd.compartmentId != recoveredCompId) {
+            double param = config.getSelectedModel().getCompartments().get(lastInd.compartmentId).getParam();
+            if(lastInd.compartmentId == susceptibleCompId) {
+                if(isRespectRule(lastInd.vaccination)) {
+                    return recoveredCompId;
+                }
+                if(isRespectRule(lastInd.maskWear)) {
+                    param = param - param * config.getMaskWearEfficacity();
+                }
                 if(metInfectious &&
                         rand.nextDouble() < param * timeScale * INDIVIDUAL_SPEED
                 ) {
-                    return compId + 1;
+                    return lastInd.compartmentId + 1;
                 }
             } else {
                 if(rand.nextDouble() < param * timeScale) {
-                    return compId + 1;
+                    return lastInd.compartmentId + 1;
                 }
             }
         }
-        return compId;
+        return lastInd.compartmentId;
     }
 
-    private double[] updatePos(double timeScale, double zoneSize, double posX, double posY, double direction) {
+    private double[] updatePos(double timeScale, double zoneSize, IndividualState lastInd) {
+        boolean inCenterZone = isInCenterZone(lastInd.posX, lastInd.posY);
+        if(inCenterZone || isRespectRule(lastInd.confinement)) {
+            return new double[]{ lastInd.posX, lastInd.posY, lastInd.direction };
+        }
+        double direction = lastInd.direction;
         if(rand.nextDouble() < INDIVIDUAL_DIRECTION_PROB * timeScale) {
             direction = MathUtils.angleMod(
                     direction + (rand.nextDouble() - 2) * Math.PI/2
             );
         }
-        return move(zoneSize, posX, posY, direction, INDIVIDUAL_SPEED * timeScale);
+        return move(zoneSize, lastInd.posX, lastInd.posY, direction, INDIVIDUAL_SPEED * timeScale);
     }
 
+    /**
+     * Effectue le mouvement d'un individu en rebondissant sur les bords
+     */
     private double[] move(double zoneSize, double posX, double posY, double direction, double speed) {
-        var pos = new double[]{
-                posX + Math.cos(direction) * speed,
-                posY + Math.sin(direction) * speed,
+        double cosDir = Math.cos(direction);
+        double sinDir = Math.sin(direction);
+        double newPosX = posX + cosDir * speed;
+        double newPosY = posY + sinDir * speed;
+
+        if((newPosX < 0 && cosDir < 0) || (newPosX >= zoneSize && cosDir > 0)) {
+            direction = Math.PI - direction;
+            newPosX = posX + Math.cos(direction) * speed;
+        }
+        if((newPosY < 0 && sinDir < 0) || (newPosY >= zoneSize && sinDir > 0)) {
+            direction = -direction;
+            newPosY = posY + Math.sin(direction) * speed;
+        }
+        return new double[] {
+                Math.max(0, Math.min(newPosX, zoneSize)),
+                Math.max(0, Math.min(newPosY, zoneSize)),
                 direction
         };
-        if(pos[0] < 0 || pos[0] >= zoneSize) {
-            return move(zoneSize, posX, posY, Math.PI - direction, speed);
-        }
-        if(pos[1] < 0 || pos[1] >= zoneSize) {
-            return move(zoneSize, posX, posY, -direction, speed);
-        }
-        return pos;
     }
 
+    /**
+     * Met à jours l'état voyageant ou arrivé et la position des individus
+     */
     private void updateTravelers(double timeScale, List<TravelerState> lastTravelers,
                                                      ArrayList<TravelerState> travelers, ArrayList<TravelerState> arrived) {
         for(var trav : lastTravelers) {
             double ratio = Math.min(trav.ratio + timeScale / TRAVELING_TIME, 1);
+            TravelerState newTrav = new TravelerState(
+                    trav.uuid, trav.compartmentId, trav.zoneId,
+                    ratio < 1 ? trav.posX : trav.dstX,
+                    ratio < 1 ? trav.posY : trav.dstY,
+                    trav.direction, trav.dstZoneId, trav.dstX, trav.dstY, ratio,
+                    trav.confinement, trav.maskWear, trav.quarantine, trav.socialDistancing, trav.vaccination
+            );
             if(ratio < 1) {
-                travelers.add(new TravelerState(trav.uuid, trav.compartmentId, trav.zoneId, trav.posX,
-                        trav.posY, trav.direction, trav.dstZoneId, trav.dstX, trav.dstY, ratio));
+                travelers.add(newTrav);
             } else {
-                arrived.add(new TravelerState(trav.uuid, trav.compartmentId, trav.zoneId, trav.dstX,
-                        trav.dstY, trav.direction, trav.dstZoneId, trav.dstX, trav.dstY, 1));
+                arrived.add(newTrav);
             }
         }
     }
 
+    /**
+     * Met à jour les statistiques de la simulation
+     */
     private SimulationStats updateStats(SimulationStats stats, List<ZoneState> zones, ZoneState quarantine,
                                         List<TravelerState> travelers, double time
     ) {
@@ -434,6 +476,9 @@ public class Simulation {
         return new SimulationStats(points, time, totalPopulation);
     }
 
+    /**
+     * Compte le nombre d'individus qui sont dans un compartiment
+     */
     private int countInCompartment(List<? extends IndividualState> individuals, int compId) {
         int count = 0;
         for(var ind : individuals) {

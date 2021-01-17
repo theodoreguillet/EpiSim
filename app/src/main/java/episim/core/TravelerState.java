@@ -31,8 +31,11 @@ public class TravelerState extends IndividualState {
     public final double ratio;
 
     public TravelerState(UUID uuid, int compartmentId, int zoneId, double posX, double posY, double direction,
-                         int dstZoneId, double dstX, double dstY, double ratio) {
-        super(uuid, compartmentId, posX, posY, direction);
+                         int dstZoneId, double dstX, double dstY, double ratio, Respect confinement,
+                         Respect maskWear, Respect quarantine, Respect socialDistancing, Respect vaccination
+    ) {
+        super(uuid, compartmentId, posX, posY, direction, confinement,
+                maskWear, quarantine, socialDistancing, vaccination);
         this.zoneId = zoneId;
         this.dstZoneId = dstZoneId;
         this.dstX = dstX;

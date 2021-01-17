@@ -73,6 +73,8 @@ public class HomeViewModel implements ViewModel {
     private final DoubleProperty socialDistancingPct = new SimpleDoubleProperty(0);
     private final DoubleProperty socialDistancingRespect = new SimpleDoubleProperty(0);
     private final DoubleProperty socialDistancingDelay = new SimpleDoubleProperty(0);
+    private final DoubleProperty vaccinationRespect = new SimpleDoubleProperty(0);
+    private final DoubleProperty vaccinationDelay = new SimpleDoubleProperty(0);
 
 
     public void initialize() {
@@ -170,6 +172,12 @@ public class HomeViewModel implements ViewModel {
     public DoubleProperty socialDistancingDelay() {
         return socialDistancingDelay;
     }
+    public DoubleProperty vaccinationRespect() {
+        return vaccinationRespect;
+    }
+    public DoubleProperty vaccinationDelay() {
+        return vaccinationDelay;
+    }
 
     private ModelConfig getModelConfig(int modelId) {
         return configScope.simulationConfig().getModels().get(modelId);
@@ -263,6 +271,13 @@ public class HomeViewModel implements ViewModel {
         socialDistancingDelay.addListener((observable, oldValue, newValue) -> {
             configScope.simulationConfig().getSocialDistancing().setDelay(newValue.doubleValue());
         });
+
+        vaccinationRespect.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getVaccination().setRespectProb(newValue.doubleValue() / 100.0);
+        });
+        vaccinationDelay.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().getVaccination().setDelay(newValue.doubleValue());
+        });
     }
     private void bindModels() {
         bindModelComps();
@@ -333,6 +348,9 @@ public class HomeViewModel implements ViewModel {
         socialDistancingPct.set(config.getSocialDistancingFactor() * 100.0);
         socialDistancingRespect.set(config.getSocialDistancing().getRespectProb() * 100.0);
         socialDistancingDelay.set(config.getSocialDistancing().getDelay());
+
+        vaccinationRespect.set(config.getVaccination().getRespectProb() * 100.0);
+        vaccinationDelay.set(config.getVaccination().getDelay());
     }
     private void loadModelConfig(int modelId) {
         var config = configScope.simulationConfig();

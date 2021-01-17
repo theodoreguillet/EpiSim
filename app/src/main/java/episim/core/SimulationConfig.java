@@ -71,6 +71,11 @@ public class SimulationConfig implements Cloneable {
      * Facteur de distantiation (par rapport à la distance de contamination)
      */
     private double socialDistancingFactor;
+    /**
+     * Règle de vaccination, chaque jour une proportion de la population respecte la règle et se fait vacciner,
+     * passant dans l'état R
+     */
+    private SimulationRuleConfig vaccination;
 
 
     SimulationConfig() {
@@ -90,12 +95,13 @@ public class SimulationConfig implements Cloneable {
         this.quarantine = new SimulationRuleConfig();
         this.socialDistancing = new SimulationRuleConfig();
         this.socialDistancingFactor = 0;
+        this.vaccination = new SimulationRuleConfig();
     }
     SimulationConfig(ArrayList<ModelConfig> models, int populationSize, double initialInfectious, double infectionRadius,
                      boolean enableCenterZone, boolean enableMultiZone, double centerZoneEnterProb, double centerZoneExitProb,
                      double multiZoneTravelProb, SimulationRuleConfig confinement, SimulationRuleConfig maskWear,
                      double maskWearEfficacity, SimulationRuleConfig quarantine, SimulationRuleConfig socialDistancing,
-                     double socialDistancingFactor
+                     double socialDistancingFactor, SimulationRuleConfig vaccination
     ) {
         this.models = models;
         this.selectedModelId = 0;
@@ -113,6 +119,7 @@ public class SimulationConfig implements Cloneable {
         this.quarantine = quarantine;
         this.socialDistancing = socialDistancing;
         this.socialDistancingFactor = socialDistancingFactor;
+        this.vaccination = vaccination;
     }
 
     public static SimulationConfig load(String path) {
@@ -293,6 +300,14 @@ public class SimulationConfig implements Cloneable {
         this.socialDistancingFactor = socialDistancingFactor;
     }
 
+    public SimulationRuleConfig getVaccination() {
+        return vaccination;
+    }
+
+    public void setVaccination(SimulationRuleConfig vaccination) {
+        this.vaccination = vaccination;
+    }
+
 
     public static SimulationConfig getDefault() {
         return new SimulationConfig(
@@ -343,7 +358,8 @@ public class SimulationConfig implements Cloneable {
                 0,
                 new SimulationRuleConfig(),
                 new SimulationRuleConfig(),
-                0
+                0,
+                new SimulationRuleConfig()
         );
     }
 }

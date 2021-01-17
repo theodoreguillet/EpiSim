@@ -14,7 +14,9 @@ import javafx.scene.layout.VBox;
 import jfxtras.styles.jmetro.MDL2IconFont;
 import org.checkerframework.checker.units.qual.A;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -97,6 +99,8 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     private EpidemicRule socialDistancingRuleController;
     @FXML
     private SpinnerSlider socialDistancingPctController;
+    @FXML
+    private EpidemicRule vaccinationRuleController;
 
     @FXML
     private void onStartSimulationAction() {
@@ -198,6 +202,11 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
         socialDistancingPctController.valueProperty().bindBidirectional(viewModel.socialDistancingPct());
         socialDistancingRuleController.respectProperty().bindBidirectional(viewModel.socialDistancingRespect());
         socialDistancingRuleController.delayProperty().bindBidirectional(viewModel.socialDistancingDelay());
+
+        vaccinationRuleController.respectProperty().bindBidirectional(viewModel.vaccinationRespect());
+        vaccinationRuleController.delayProperty().bindBidirectional(viewModel.vaccinationDelay());
+        vaccinationRuleController.setRespectText(new String("Pourcentage vacciné par jour".getBytes(), StandardCharsets.UTF_8));
+        vaccinationRuleController.setRespectRange(0, 20, 0.01);
 
         rulesAccordion.setExpandedPane(rulesDefaultExpendedPane);
     }

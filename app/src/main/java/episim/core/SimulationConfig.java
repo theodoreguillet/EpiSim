@@ -16,7 +16,7 @@ public class SimulationConfig implements Cloneable {
      */
     private int selectedModelId;
     /**
-     * La taille de la population
+     * La taille de la population (par zone)
      */
     private int populationSize;
     /**
@@ -36,9 +36,13 @@ public class SimulationConfig implements Cloneable {
      */
     private boolean enableMultiZone;
     /**
-     * Probabilité qu'un individu voyage vers/depuis la zone centrale par jour
+     * Probabilité qu'un individu entre dans la zone centrale par jour
      */
-    private double centerZoneTravelProb;
+    private double centerZoneEnterProb;
+    /**
+     * Probabilité qu'un individu sorte de la zone centrale par jour
+     */
+    private double centerZoneExitProb;
     /**
      * Probabilité qu'un individu voyage vers une autre zone par jour
      */
@@ -69,7 +73,8 @@ public class SimulationConfig implements Cloneable {
         this.infectionRadius = 0;
         this.enableCenterZone = false;
         this.enableMultiZone = false;
-        this.centerZoneTravelProb = 0;
+        this.centerZoneEnterProb = 0;
+        this.centerZoneExitProb = 0;
         this.multiZoneTravelProb = 0;
         this.confinement = new SimulationRuleConfig();
         this.maskWear = new SimulationRuleConfig();
@@ -77,9 +82,9 @@ public class SimulationConfig implements Cloneable {
         this.socialDistancing = new SimulationRuleConfig();
     }
     SimulationConfig(ArrayList<ModelConfig> models, int populationSize, double initialInfectious, double infectionRadius,
-                     boolean enableCenterZone, boolean enableMultiZone, double centerZoneTravelProb, double multiZoneTravelProb,
-                     SimulationRuleConfig confinement, SimulationRuleConfig maskWear, SimulationRuleConfig quarantine,
-                     SimulationRuleConfig socialDistancing
+                     boolean enableCenterZone, boolean enableMultiZone, double centerZoneEnterProb, double centerZoneExitProb,
+                     double multiZoneTravelProb, SimulationRuleConfig confinement, SimulationRuleConfig maskWear,
+                     SimulationRuleConfig quarantine, SimulationRuleConfig socialDistancing
     ) {
         this.models = models;
         this.selectedModelId = 0;
@@ -88,7 +93,8 @@ public class SimulationConfig implements Cloneable {
         this.infectionRadius = infectionRadius;
         this.enableCenterZone = enableCenterZone;
         this.enableMultiZone = enableMultiZone;
-        this.centerZoneTravelProb = centerZoneTravelProb;
+        this.centerZoneEnterProb = centerZoneEnterProb;
+        this.centerZoneExitProb = centerZoneExitProb;
         this.multiZoneTravelProb = multiZoneTravelProb;
         this.confinement = confinement;
         this.maskWear = maskWear;
@@ -202,12 +208,20 @@ public class SimulationConfig implements Cloneable {
         this.enableMultiZone = enableMultiZone;
     }
 
-    public double getCenterZoneTravelProb() {
-        return centerZoneTravelProb;
+    public double getCenterZoneEnterProb() {
+        return centerZoneEnterProb;
     }
 
-    public void setCenterZoneTravelProb(double centerZoneTravelProb) {
-        this.centerZoneTravelProb = centerZoneTravelProb;
+    public void setCenterZoneEnterProb(double centerZoneEnterProb) {
+        this.centerZoneEnterProb = centerZoneEnterProb;
+    }
+
+    public double getCenterZoneExitProb() {
+        return centerZoneExitProb;
+    }
+
+    public void setCenterZoneExitProb(double centerZoneExitProb) {
+        this.centerZoneExitProb = centerZoneExitProb;
     }
 
     public double getMultiZoneTravelProb() {
@@ -291,8 +305,9 @@ public class SimulationConfig implements Cloneable {
                 10,
                 false,
                 false,
-                0,
-                0,
+                0.24,
+                0.1,
+                0.03,
                 new SimulationRuleConfig(),
                 new SimulationRuleConfig(),
                 new SimulationRuleConfig(),

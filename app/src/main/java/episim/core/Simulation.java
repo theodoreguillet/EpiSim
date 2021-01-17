@@ -1,7 +1,6 @@
 package episim.core;
 
 import episim.util.MathUtils;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,12 +13,16 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Simulation {
     public static final int ZONE_SIZE = 100;
+    public static final int MULTI_ZONE_NUMBER = 9;
+    public static final int ZONE_CENTER_SIZE = 10;
+    public static final int ZONE_CENTER_X = (ZONE_SIZE - ZONE_CENTER_SIZE)/2;
+    public static final int ZONE_CENTER_Y = (ZONE_SIZE - ZONE_CENTER_SIZE)/2;
     public static final int QUARANTINE_SIZE = ZONE_SIZE / 4;
+    public static final int QUARANTINE_ZONE_ID = -1;
     public static final int MAX_POP = 10000; // population a partir le laquelle les naissances ne se produisent pas
     public static final double INDIVIDUAL_SPEED = 10; // Vitesse en distance par jours
-    public static final double TRAVELING_TIME = 2;
+    public static final double TRAVELING_TIME = 1;
     public static final double INDIVIDUAL_DIRECTION_PROB = 0.05;
-    public static final double CONTAMINATION_RADIUS = 10;
     public static final double MIN_CLOCK_SPEED = 30;
     public static final int STATS_UPDATE_DELAY = 100; // 100ms
 
@@ -28,7 +31,6 @@ public class Simulation {
     private final int susceptibleCompId;
     private final int infectiousCompId;
     private final int recoveredCompId;
-    private final int quarantineZoneId = -1;
 
     private double simulationSpeed = 1; // Vitesse de la simulation en jours par seconde
     private double clockSpeed = MIN_CLOCK_SPEED; // Nombre de mise à jours de la simulation par seconde
@@ -44,7 +46,7 @@ public class Simulation {
 
     public Simulation(SimulationConfig config) {
         this.config = (SimulationConfig)config.clone();
-        this.nzones = 1;
+        this.nzones = this.config.isEnableMultiZone() ? MULTI_ZONE_NUMBER : 1;
         int infectiousCompId = 1;
         for(int i = 0; i < this.config.getSelectedModel().getCompartments().size(); i++) {
             if(this.config.getSelectedModel().getCompartments().get(i).getName().equals(CompartmentConfig.INFECTIOUS)) {
@@ -144,7 +146,7 @@ public class Simulation {
      * Génère l'état initial de la simulation
      */
     private void initState() {
-        int popSize = config.getPopulationSize();
+        int popSize = config.getPopulationSize() * nzones;
         int popInfected = (int)(config.getInitialInfectious() * (double)popSize);
 
         var zones = new ArrayList<ZoneState>(nzones);
@@ -191,9 +193,9 @@ public class Simulation {
 
         var zones = new ArrayList<ZoneState>(nzones);
         for(int i = 0; i < lastState.zones.size(); i++) {
-            zones.add(updateZone(timeScale, ZONE_SIZE, i, allowBirth, travelers, arrived, lastState.zones.get(i)));
+            zones.add(updateZone(timeScale, time, ZONE_SIZE, i, allowBirth, travelers, arrived, lastState.zones.get(i)));
         }
-        var quarantine = updateZone(timeScale, QUARANTINE_SIZE, quarantineZoneId, false,
+        var quarantine = updateZone(timeScale, time, QUARANTINE_SIZE, QUARANTINE_ZONE_ID, false,
                 travelers, arrived, lastState.quarantine);
 
         var stats = lastState.stats;
@@ -205,7 +207,7 @@ public class Simulation {
         this.state.set(new SimulationState(zones, quarantine, travelers, time, stats));
     }
 
-    private ZoneState updateZone(double timeScale, int zoneSize, int zoneId, boolean allowBirth,
+    private ZoneState updateZone(double timeScale, double time, int zoneSize, int zoneId, boolean allowBirth,
                                  ArrayList<TravelerState> travelers, ArrayList<TravelerState> arrived,
                                  ZoneState lastZone) {
         ArrayList<IndividualState> individuals =
@@ -231,18 +233,55 @@ public class Simulation {
                 );
             }
 
-            var pos = updatePos(timeScale, zoneSize, lastInd.posX, lastInd.posY, lastInd.direction);
+            // On bouge si on n'est pas dans la zone centrale
+            boolean inCenterZone = isInCenterZone(lastInd.posX, lastInd.posY);
+            double[] pos = { lastInd.posX, lastInd.posY, direction };
+            if(!inCenterZone) {
+                pos = updatePos(timeScale, zoneSize, lastInd.posX, lastInd.posY, lastInd.direction);
+            }
 
             boolean travel = false;
             double dstX = 0, dstY = 0;
             int dstZoneId = 0;
 
-            if(config.getQuarantine().isEnabled() && zoneId != quarantineZoneId && compId == infectiousCompId) {
-                if(rand.nextDouble() < config.getQuarantine().getRespectProb() * timeScale) {
-                    travel = true;
-                    dstZoneId = quarantineZoneId;
-                    dstX = (double)QUARANTINE_SIZE / 2.0;
-                    dstY = (double)QUARANTINE_SIZE / 2.0;
+            // On applique les règles sanitaire et comportements
+            if(zoneId != QUARANTINE_ZONE_ID) {
+                if(isRuleEnabled(config.getQuarantine(), time) && compId == infectiousCompId) {
+                    if(config.getQuarantine().getRespectProb() == 1 ||
+                            rand.nextDouble() < config.getQuarantine().getRespectProb() * timeScale
+                    ) {
+                        travel = true;
+                        dstZoneId = QUARANTINE_ZONE_ID;
+                        dstX = (double)QUARANTINE_SIZE / 2.0;
+                        dstY = (double)QUARANTINE_SIZE / 2.0;
+                    }
+                }
+                if(!travel && nzones > 1 && config.getMultiZoneTravelProb() > 0) {
+                    if(rand.nextDouble() < config.getMultiZoneTravelProb() * timeScale) {
+                        travel = true;
+                        dstZoneId = rand.nextInt(nzones);
+                        dstX = (double)ZONE_SIZE / 2.0;
+                        dstY = (double)ZONE_SIZE / 2.0;
+                    }
+                }
+                if(!travel && config.isEnableCenterZone()) {
+                    if(inCenterZone) {
+                        if(rand.nextDouble() < config.getCenterZoneExitProb() * timeScale) {
+                            travel = true;
+                            dstZoneId = zoneId;
+                            do {
+                                dstX = rand.nextInt(ZONE_SIZE);
+                                dstY = rand.nextInt(ZONE_SIZE);
+                            } while (isInCenterZone(dstX, dstY));
+                        }
+                    } else {
+                        if(rand.nextDouble() < config.getCenterZoneEnterProb() * timeScale) {
+                            travel = true;
+                            dstZoneId = zoneId;
+                            dstX = ZONE_CENTER_X + rand.nextInt(ZONE_CENTER_SIZE);
+                            dstY = ZONE_CENTER_Y + rand.nextInt(ZONE_CENTER_SIZE);
+                        }
+                    }
                 }
             }
 
@@ -274,14 +313,29 @@ public class Simulation {
         return new ZoneState(individuals);
     }
 
+    private boolean isInCenterZone(double posX, double posY) {
+        return config.isEnableCenterZone() &&
+                posX >= ZONE_CENTER_X && posY >= ZONE_CENTER_Y &&
+                posX < ZONE_CENTER_X + ZONE_CENTER_SIZE && posY < ZONE_CENTER_Y + ZONE_CENTER_SIZE;
+    }
+
+    private boolean isRuleEnabled(SimulationRuleConfig rule, double time) {
+        return rule.getRespectProb() > 0 && time >= rule.getDelay();
+    }
+
     private boolean hasMetInfectious(IndividualState ind, List<IndividualState> others) {
+        boolean inCenterZone = isInCenterZone(ind.posX, ind.posY);
         for(var other : others) {
-            if(other.uuid != ind.uuid &&
-                    other.compartmentId == infectiousCompId &&
-                    MathUtils.dst2(other.posX, other.posY, ind.posX, ind.posY) <
-                            (CONTAMINATION_RADIUS * CONTAMINATION_RADIUS)/4
-            ) {
-                return true;
+            if(other.uuid != ind.uuid && other.compartmentId == infectiousCompId) {
+                boolean otherInCenterZone = isInCenterZone(other.posX, other.posY);
+                if(otherInCenterZone && inCenterZone) {
+                    return true;
+                } else if(!inCenterZone &&
+                        MathUtils.dst2(other.posX, other.posY, ind.posX, ind.posY) <
+                            (config.getInfectionRadius() * config.getInfectionRadius())/4
+                ) {
+                    return true;
+                }
             }
         }
         return false;
@@ -315,7 +369,7 @@ public class Simulation {
         return compId;
     }
 
-    private double[] updatePos(double timeScale, int zoneSize, double posX, double posY, double direction) {
+    private double[] updatePos(double timeScale, double zoneSize, double posX, double posY, double direction) {
         if(rand.nextDouble() < INDIVIDUAL_DIRECTION_PROB * timeScale) {
             direction = MathUtils.angleMod(
                     direction + (rand.nextDouble() - 2) * Math.PI/2
@@ -324,7 +378,7 @@ public class Simulation {
         return move(zoneSize, posX, posY, direction, INDIVIDUAL_SPEED * timeScale);
     }
 
-    private double[] move(int zoneSize, double posX, double posY, double direction, double speed) {
+    private double[] move(double zoneSize, double posX, double posY, double direction, double speed) {
         var pos = new double[]{
                 posX + Math.cos(direction) * speed,
                 posY + Math.sin(direction) * speed,

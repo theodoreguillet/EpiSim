@@ -35,10 +35,6 @@ public class SimulationRuleConfig implements Cloneable {
         return null;
     }
 
-    public boolean isEnabled() {
-        return respectProb != 0;
-    }
-
     public double getRespectProb() {
         return respectProb;
     }

@@ -10,6 +10,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import jfxtras.styles.jmetro.MDL2IconFont;
 import org.checkerframework.checker.units.qual.A;
 
@@ -60,7 +61,25 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     private SpinnerSlider infecPctController;
 
     @FXML
+    private SpinnerSlider infecRadiusController;
+
+    @FXML
     private ChoiceBox<String> simulationMode;
+
+    @FXML
+    private VBox simulationModeParamsContainer;
+    @FXML
+    private VBox centerZoneEnterProbContainer;
+    @FXML
+    private SpinnerSlider centerZoneEnterProbController;
+    @FXML
+    private VBox centerZoneExitProbContainer;
+    @FXML
+    private SpinnerSlider centerZoneExitProbController;
+    @FXML
+    private VBox multiZoneTravelProbContainer;
+    @FXML
+    private SpinnerSlider multiZoneTravelProbController;
 
     @FXML
     private Accordion rulesAccordion;
@@ -113,6 +132,11 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
         infecPctController.setStep(0.1);
         infecPctController.valueProperty().bindBidirectional(viewModel.infecPctProperty());
 
+        infecRadiusController.setMin(1);
+        infecRadiusController.setMax(50);
+        infecRadiusController.setStep(1);
+        infecRadiusController.valueProperty().bindBidirectional(viewModel.infecRadiusProperty());
+
         addModelBtn.setGraphic(new MDL2IconFont("\uE710"));
 
         viewModel.chartProperty().addListener((ListChangeListener.Change<? extends ModelChart.Chart> c) -> {
@@ -136,6 +160,26 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
                 HomeViewModel.SIMULATION_ZONES
         );
         simulationMode.valueProperty().bindBidirectional(viewModel.simulationMode());
+        simulationMode.valueProperty().addListener((observable, oldValue, newValue) -> {
+            handleSimulationModeChanged(newValue);
+        });
+        handleSimulationModeChanged(simulationMode.valueProperty().get());
+
+        centerZoneEnterProbController.setMin(0);
+        centerZoneEnterProbController.setMax(2);
+        centerZoneEnterProbController.setStep(0.01);
+        centerZoneEnterProbController.valueProperty().bindBidirectional(viewModel.centerZoneEnterProb());
+        centerZoneEnterProbController.adjustValue(centerZoneEnterProbController.getValue());
+        centerZoneExitProbController.setMin(0);
+        centerZoneExitProbController.setMax(10);
+        centerZoneExitProbController.setStep(0.1);
+        centerZoneExitProbController.valueProperty().bindBidirectional(viewModel.centerZoneExitProb());
+        centerZoneExitProbController.adjustValue(centerZoneExitProbController.getValue());
+        multiZoneTravelProbController.setMin(0);
+        multiZoneTravelProbController.setMax(10);
+        multiZoneTravelProbController.setStep(0.01);
+        multiZoneTravelProbController.valueProperty().bindBidirectional(viewModel.multiZoneTravelProb());
+        multiZoneTravelProbController.adjustValue(multiZoneTravelProbController.getValue());
 
         confinementRuleController.respectProperty().bindBidirectional(viewModel.confinementRespect());
         confinementRuleController.delayProperty().bindBidirectional(viewModel.confinementDelay());
@@ -206,6 +250,25 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
             } catch (Exception err) {
                 // TODO: Report error to user
                 err.printStackTrace(System.err);
+            }
+        }
+    }
+
+    private void handleSimulationModeChanged(String simulationMode) {
+        switch (simulationMode) {
+            case HomeViewModel.SIMULATION_CENTER -> {
+                simulationModeParamsContainer.getChildren().setAll(
+                        centerZoneEnterProbContainer,
+                        centerZoneExitProbContainer
+                );
+            }
+            case HomeViewModel.SIMULATION_ZONES -> {
+                simulationModeParamsContainer.getChildren().setAll(
+                        multiZoneTravelProbContainer
+                );
+            }
+            default -> {
+                simulationModeParamsContainer.getChildren().clear();
             }
         }
     }

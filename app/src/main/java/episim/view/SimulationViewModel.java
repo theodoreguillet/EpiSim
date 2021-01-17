@@ -139,13 +139,13 @@ public class SimulationViewModel implements ViewModel {
     }
 
     public Rectangle2D getZoneSize() {
-        return new Rectangle2D(0, 0, simulation.ZONE_SIZE, simulation.ZONE_SIZE);
+        return new Rectangle2D(0, 0, Simulation.ZONE_SIZE, Simulation.ZONE_SIZE);
     }
 
     private void createSimulationWorld(SimulationState state) {
         int nzones = state.zones.size();
-        double quarantineSize = simulation.QUARANTINE_SIZE;
-        double zoneSize = simulation.ZONE_SIZE;
+        double quarantineSize = Simulation.QUARANTINE_SIZE;
+        double zoneSize = Simulation.ZONE_SIZE;
 
         double quarantineGap = 15;
         double gridGap = 10;
@@ -165,13 +165,11 @@ public class SimulationViewModel implements ViewModel {
                     zoneSize, zoneSize
             );
             ArrayList<Rectangle2D> rects = new ArrayList<>();
-            if(false) { // TODO Change it
-                int centerSize = 10;
-                rects.add(new Rectangle2D(
-                        (zoneBounds.getWidth() - centerSize) / 2,
-                        (zoneBounds.getHeight() - centerSize) / 2,
-                        centerSize, centerSize
-                ));
+            if(configScope.simulationConfig().isEnableCenterZone()) {
+                int centerSize = Simulation.ZONE_CENTER_SIZE;
+                int centerX = Simulation.ZONE_CENTER_X;
+                int centerY = Simulation.ZONE_CENTER_Y;
+                rects.add(new Rectangle2D(centerX, centerY, centerSize, centerSize));
             }
             Zone zone = new Zone(zoneBounds, Color.BLACK, rects);
             zones.add(zone);
@@ -196,22 +194,45 @@ public class SimulationViewModel implements ViewModel {
     private void updateSimulationPoints(SimulationState state) {
         points = new ArrayList<>();
         for(int i = 0; i < state.zones.size() + 1; i++) {
-            ZoneState zoneState = i < state.zones.size() ? state.zones.get(i) : state.quarantine;
+            boolean isQuarantine = i == state.zones.size();
+            ZoneState zoneState = isQuarantine ? state.quarantine : state.zones.get(i);
             Zone zone = zones.get(i);
             points.ensureCapacity(zoneState.individuals.size());
             for(var ind : zoneState.individuals) {
+                boolean inCenterZone = !zone.rects.isEmpty() &&
+                        zone.rects.get(0).contains(new Point2D(ind.posX, ind.posY));
+                double x = zone.bounds().getMinX() + ind.posX;
+                double y = zone.bounds().getMinY() + ind.posY;
                 CompartmentConfig comp = configScope.simulationConfig().getSelectedModel().getCompartments().get(ind.compartmentId);
-                Point point = new Point(
-                        new Point2D(
-                                zone.bounds().getMinX() + ind.posX,
-                                zone.bounds().getMinY() + ind.posY
-                        ),
-                        Color.valueOf(comp.getColor()),
-                        comp.getName().equals(CompartmentConfig.INFECTIOUS) ? simulation.CONTAMINATION_RADIUS : 0
-                );
-                points.add(point);
+                points.add(getSimulationPoint(ind.compartmentId, x, y, !isQuarantine && !inCenterZone));
             }
         }
+        for(var ind : state.travelers) {
+            Zone zone = ind.zoneId != Simulation.QUARANTINE_ZONE_ID ? zones.get(ind.zoneId) :
+                    quarantineEnabled ? zones.get(zones.size() - 1) : null;
+            Zone dstZone = ind.dstZoneId != Simulation.QUARANTINE_ZONE_ID ? zones.get(ind.dstZoneId) :
+                    quarantineEnabled ? zones.get(zones.size() - 1) : null;
+            if(zone == null || dstZone == null) {
+                continue;
+            }
+            double srcX = zone.bounds().getMinX() + ind.posX;
+            double srcY = zone.bounds().getMinY() + ind.posY;
+            double dstX = dstZone.bounds().getMinX() + ind.dstX;
+            double dstY = dstZone.bounds().getMinY() + ind.dstY;
+            double x = srcX + ind.ratio * (dstX - srcX);
+            double y = srcY + ind.ratio * (dstY - srcY);
+            points.add(getSimulationPoint(ind.compartmentId, x, y, false));
+        }
+    }
+
+    private Point getSimulationPoint(int compartmentId, double x, double y, boolean allowEmit) {
+        CompartmentConfig comp = configScope.simulationConfig().getSelectedModel().getCompartments().get(compartmentId);
+        return new Point(
+                new Point2D(x, y),
+                Color.valueOf(comp.getColor()),
+                allowEmit && comp.getName().equals(CompartmentConfig.INFECTIOUS)
+                        ? configScope.simulationConfig().getInfectionRadius() : 0
+        );
     }
 
     private void updateSimulationChart(SimulationState state) {

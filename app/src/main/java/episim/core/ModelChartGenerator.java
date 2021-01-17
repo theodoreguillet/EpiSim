@@ -48,11 +48,12 @@ public class ModelChartGenerator{
      * @param modelconfig La configuration du modèle
      * @param initialInfectious La proportion de la population initialement infectieuse
      * @param populationSize La taille de la population
+     * @param infectionRadius La distance minimum de transmission du virus (pour la pseudo spatialisation)
      * @param pseudoSpatialisation Simule la spatialisation
      * @param tmax Le temps maximum de l'intervalle étudié [0, tmax]
      * @param npoints Le nombre de points de la courbe
      */
-    public ModelChartGenerator(ModelConfig modelconfig, double initialInfectious, double populationSize,
+    public ModelChartGenerator(ModelConfig modelconfig, double initialInfectious, double populationSize, double infectionRadius,
                                boolean pseudoSpatialisation, double tmax, int npoints) {
         this.modelconfig = modelconfig;
         this.initialInfectious = initialInfectious;
@@ -63,7 +64,7 @@ public class ModelChartGenerator{
 
         if(pseudoSpatialisation) {
             // On simule grossièrement la spatialisation
-            infectionFactor = Math.PI * Simulation.CONTAMINATION_RADIUS * Simulation.CONTAMINATION_RADIUS
+            infectionFactor = Math.PI * infectionRadius * infectionRadius
                         / ((double)Simulation.ZONE_SIZE * (double) Simulation.ZONE_SIZE);
         } else {
             infectionFactor = 1.0;

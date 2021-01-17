@@ -117,6 +117,12 @@
                               <fx:include fx:id="infecPct" source="component/SpinnerSlider.fxml" />
                            </children>
                         </VBox>
+                        <VBox spacing="5.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Distance de contamination" />
+                              <fx:include fx:id="infecRadius" source="component/SpinnerSlider.fxml" />
+                           </children>
+                        </VBox>
                      </children>
                      <padding>
                         <Insets bottom="20.0" left="20.0" right="20.0" />
@@ -138,6 +144,28 @@
                         </FXCollections>
                      </items>
                   </ChoiceBox>
+                  <VBox fx:id="simulationModeParamsContainer" spacing="5.0">
+                     <children>
+                        <VBox fx:id="centerZoneEnterProbContainer" spacing="5.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Pourcentage de visite par heure" />
+                              <fx:include fx:id="centerZoneEnterProb" source="component/SpinnerSlider.fxml" />
+                           </children>
+                        </VBox>
+                        <VBox fx:id="centerZoneExitProbContainer" spacing="5.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Pourcentage de sortie par heure" />
+                              <fx:include fx:id="centerZoneExitProb" source="component/SpinnerSlider.fxml" />
+                           </children>
+                        </VBox>
+                        <VBox fx:id="multiZoneTravelProbContainer" spacing="5.0">
+                           <children>
+                              <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Pourcentage de voyage par jour" />
+                              <fx:include fx:id="multiZoneTravelProb" source="component/SpinnerSlider.fxml" />
+                           </children>
+                        </VBox>
+                     </children>
+                  </VBox>
                   <Accordion fx:id="rulesAccordion">
                     <panes>
                       <TitledPane fx:id="rulesDefaultExpendedPane" animated="false" text="Confinement">

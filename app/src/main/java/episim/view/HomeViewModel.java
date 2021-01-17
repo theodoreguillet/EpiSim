@@ -55,10 +55,14 @@ public class HomeViewModel implements ViewModel {
     private final DoubleProperty modelDeath = new SimpleDoubleProperty();
     private final DoubleProperty popSize = new SimpleDoubleProperty();
     private final DoubleProperty infecPct = new SimpleDoubleProperty();
+    private final DoubleProperty infecRadius = new SimpleDoubleProperty();
     private final ObservableList<ModelChart.Chart> chartsData = FXCollections.observableArrayList();
     private final BooleanProperty pseudoSpatialisation = new SimpleBooleanProperty(true);
     private final DoubleProperty chartScale = new SimpleDoubleProperty(100);
     private final StringProperty simulationMode = new SimpleStringProperty(SIMULATION_SIMPLE);
+    private final DoubleProperty centerZoneEnterProb = new SimpleDoubleProperty(0);
+    private final DoubleProperty centerZoneExitProb = new SimpleDoubleProperty(0);
+    private final DoubleProperty multiZoneTravelProb = new SimpleDoubleProperty(0);
     private final DoubleProperty confinementRespect = new SimpleDoubleProperty(0);
     private final DoubleProperty confinementDelay = new SimpleDoubleProperty(0);
     private final DoubleProperty maskWearRespect = new SimpleDoubleProperty(0);
@@ -110,6 +114,9 @@ public class HomeViewModel implements ViewModel {
     public DoubleProperty infecPctProperty() {
         return infecPct;
     }
+    public DoubleProperty infecRadiusProperty() {
+        return infecRadius;
+    }
     public ObservableList<ModelChart.Chart> chartProperty() {
         return chartsData;
     }
@@ -118,6 +125,15 @@ public class HomeViewModel implements ViewModel {
     }
     public StringProperty simulationMode() {
         return simulationMode;
+    }
+    public DoubleProperty centerZoneEnterProb() {
+        return centerZoneEnterProb;
+    }
+    public DoubleProperty centerZoneExitProb() {
+        return centerZoneExitProb;
+    }
+    public DoubleProperty multiZoneTravelProb() {
+        return multiZoneTravelProb;
     }
     public DoubleProperty chartScaleProperty() {
         return chartScale;
@@ -171,6 +187,14 @@ public class HomeViewModel implements ViewModel {
             configScope.simulationConfig().setInitialInfectious(newValue.doubleValue() / 100.0);
             updateChart();
         });
+        infecRadius.addListener((observable, oldValue, newValue) -> {
+            if(newValue.doubleValue() < 1) {
+                infecRadius.set(1);
+            } else {
+                configScope.simulationConfig().setInfectionRadius(newValue.doubleValue());
+                updateChart();
+            }
+        });
         simulationMode.addListener((observable, oldValue, newValue) -> {
             var config = configScope.simulationConfig();
             switch (newValue) {
@@ -187,6 +211,15 @@ public class HomeViewModel implements ViewModel {
                     config.setEnableMultiZone(true);
                 }
             }
+        });
+        centerZoneEnterProb.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().setCenterZoneEnterProb(newValue.doubleValue() / 100.0 * 24.0);
+        });
+        centerZoneExitProb.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().setCenterZoneExitProb(newValue.doubleValue() / 100.0 * 24.0);
+        });
+        multiZoneTravelProb.addListener((observable, oldValue, newValue) -> {
+            configScope.simulationConfig().setMultiZoneTravelProb(newValue.doubleValue() / 100.0);
         });
 
         confinementRespect.addListener((observable, oldValue, newValue) -> {
@@ -265,8 +298,13 @@ public class HomeViewModel implements ViewModel {
 
         popSize.set(config.getPopulationSize());
         infecPct.set(config.getInitialInfectious() * 100.0);
+        infecRadius.set(config.getInfectionRadius());
         simulationMode.set(config.isEnableMultiZone() ? SIMULATION_ZONES
                 : config.isEnableCenterZone() ? SIMULATION_CENTER : SIMULATION_SIMPLE);
+
+        centerZoneEnterProb.set(config.getCenterZoneEnterProb() * 100.0 / 24.0);
+        centerZoneExitProb.set(config.getCenterZoneExitProb() * 100.0 / 24.0);
+        multiZoneTravelProb.set(config.getMultiZoneTravelProb() * 100.0);
 
         confinementRespect.set(config.getConfinement().getRespectProb() * 100.0);
         confinementDelay.set(config.getConfinement().getDelay());
@@ -298,6 +336,7 @@ public class HomeViewModel implements ViewModel {
                 modelConfig,
                 infecPctProperty().get() / 100,
                 popSizeProperty().get(),
+                infecRadius.get(),
                 pseudoSpatialisation.get(),
                 chartScale.doubleValue(),
                 400

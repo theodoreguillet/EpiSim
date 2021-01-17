@@ -48,12 +48,7 @@ public class ModelSelect implements Initializable {
         MDL2IconFont removeIcon = new MDL2IconFont("\uE74D");
         removeBtn.setGraphic(removeIcon);
 
-        toggle.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                displayEdit(newValue);
-            }
-        });
+        toggle.selectedProperty().addListener((observable, oldValue, newValue) -> displayEdit(newValue));
         displayEdit(toggle.isSelected());
     }
 

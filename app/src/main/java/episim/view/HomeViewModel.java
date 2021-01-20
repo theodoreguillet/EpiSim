@@ -7,6 +7,7 @@ import episim.core.ModelChartGenerator;
 import episim.core.ModelConfig;
 import episim.view.component.ModelChart;
 import episim.view.component.ModelComp;
+import episim.view.popup.ModelEditorViewPopup;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
@@ -88,13 +89,37 @@ public class HomeViewModel implements ViewModel {
             updateChart();
         });
 
+        ModelEditorViewPopup.onValidateProperty().set(config -> {
+            if(config != null) {
+                if(!configScope.simulationConfig().getModels().contains(config)) {
+                    configScope.simulationConfig().addModel(config);
+                }
+                loadConfig();
+            }
+        });
+
         loadConfig();
         bindConfig();
-        updateChart();
     }
 
     public void startSimulation() {
         configScope.publish(ConfigurationScope.SIMULATION);
+    }
+
+    public void editModel(int modelId) {
+        ModelEditorViewPopup.open(getModelConfig(modelId));
+    }
+
+    public void addModel() {
+        ModelEditorViewPopup.open(ModelConfig.getDefault());
+    }
+
+    public void removeModel(int modelId) {
+        if(configScope.simulationConfig().getModels().size() > 1) {
+            // Il doit y avoir toujours au moins un modèle
+            configScope.simulationConfig().removeModel(modelId);
+            loadConfig();
+        }
     }
 
     public ObservableList<String> modelsProperty() {
@@ -318,11 +343,15 @@ public class HomeViewModel implements ViewModel {
      */
     private void loadConfig() {
         var config = configScope.simulationConfig();
-        models.clear();
-        for(var model : config.getModels()) {
-            models.add(model.getName());
-        }
+
         selectedModelId.set(config.getSelectedModelId());
+
+        ArrayList<String> modelNames = new ArrayList<>(models.size());
+        for(var model : config.getModels()) {
+            modelNames.add(model.getName());
+        }
+        models.setAll(modelNames);
+
         loadModelConfig(selectedModelId.get());
 
         popSize.set(config.getPopulationSize());
@@ -351,6 +380,8 @@ public class HomeViewModel implements ViewModel {
 
         vaccinationRespect.set(config.getVaccination().getRespectProb() * 100.0);
         vaccinationDelay.set(config.getVaccination().getDelay());
+
+        updateChart();
     }
     private void loadModelConfig(int modelId) {
         var config = configScope.simulationConfig();

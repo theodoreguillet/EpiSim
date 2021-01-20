@@ -12,9 +12,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import jfxtras.styles.jmetro.MDL2IconFont;
-import org.checkerframework.checker.units.qual.A;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -112,6 +110,7 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         viewModel.modelsProperty().addListener((ListChangeListener.Change<? extends String> c) -> {
             handleModelsChanged((ObservableList<String>) c.getList());
+            handleSelectedModelIdChanged(viewModel.selectedModelId().get());
         });
         handleModelsChanged(viewModel.modelsProperty());
 
@@ -119,6 +118,10 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
             handleSelectedModelIdChanged(newValue.intValue());
         });
         handleSelectedModelIdChanged(viewModel.selectedModelId().get());
+
+        addModelBtn.setOnAction(e -> {
+            viewModel.addModel();
+        });
 
         viewModel.modelCompsProperty().addListener((ListChangeListener.Change<? extends HomeViewModel.ModelCompProperty> c) -> {
             handleModelCompsChanged((ObservableList<HomeViewModel.ModelCompProperty>) c.getList());
@@ -226,13 +229,25 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
                 }
             }
         });
-        for (String model : models) {
+        for (int i = 0; i < models.size(); i++) {
+            var model = models.get(i);
+            final int modelId = i;
             try {
                 var loader = ModelSelect.load();
                 modelsList.getChildren().add(loader.getRoot());
                 ModelSelect controller = loader.getController();
                 controller.setToggleGroup(modelsListToggleGroup);
                 controller.setName(model);
+                controller.onEditActionProperty().set(e -> {
+                    viewModel.editModel(modelId);
+                });
+                if(models.size() > 1) {
+                    controller.onRemoveActionProperty().set(e -> {
+                        viewModel.removeModel(modelId);
+                    });
+                } else {
+                    controller.setRemoveButtonVisible(false);
+                }
                 modelsListToggles.add(controller.getToggle());
             } catch (Exception err) {
                 // TODO: Report error to user
@@ -242,7 +257,7 @@ public class HomeView implements FxmlView<HomeViewModel>, Initializable {
     }
 
     private void handleSelectedModelIdChanged(int modelId) {
-        if(modelsListToggleGroup != null) {
+        if(modelsListToggleGroup != null && modelId < modelsListToggles.size()) {
             modelsListToggleGroup.selectToggle(modelsListToggles.get(modelId));
         }
     }

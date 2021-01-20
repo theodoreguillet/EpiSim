@@ -14,21 +14,19 @@ import jfxtras.styles.jmetro.Style;
  * Classe principale de l'application
  */
 public class App extends MvvmfxGuiceApplication {
+    private static Stage primaryStage;
     public String getGreeting() {
         return "Hello World!";
     }
 
     @Override
     public void startMvvmfx(Stage primaryStage) throws Exception {
+        App.primaryStage = primaryStage;
+
         Parent parent = FluentViewLoader.fxmlView(MainView.class).load().getView();
         var scene = new Scene(parent);
 
-        // Apply metro theme
-        JMetro jMetro = new JMetro(Style.LIGHT);
-        jMetro.setScene(scene);
-
-        // Apply css styling
-        scene.getStylesheets().add("episim/css/styles.css");
+        applyTheme(scene);
 
         primaryStage.setOnCloseRequest((e) -> {
             Platform.exit();
@@ -42,5 +40,18 @@ public class App extends MvvmfxGuiceApplication {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static Stage getPrimaryStage() {
+        return primaryStage;
+    }
+
+    public static void applyTheme(Scene scene) {
+        // Apply metro theme
+        JMetro jMetro = new JMetro(Style.LIGHT);
+        jMetro.setScene(scene);
+
+        // Apply css styling
+        scene.getStylesheets().add("episim/css/styles.css");
     }
 }

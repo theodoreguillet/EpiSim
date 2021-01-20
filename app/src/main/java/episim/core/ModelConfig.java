@@ -2,6 +2,7 @@ package episim.core;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class ModelConfig implements Serializable, Cloneable {
      * Compartiments du modèle épidémique dans l'ordre
      * des états-transitions
      */
-    private ArrayList<CompartmentConfig> compartments;
+    private List<CompartmentConfig> compartments;
     /**
      * Nom du modèle épidémique
      */
@@ -33,7 +34,7 @@ public class ModelConfig implements Serializable, Cloneable {
         this.birth = 0;
         this.death = 0;
     }
-    public ModelConfig(ArrayList<CompartmentConfig> compartments, String name, double birth, double death) {
+    public ModelConfig(List<CompartmentConfig> compartments, String name, double birth, double death) {
         this.compartments = compartments;
         this.name = name;
         this.birth = birth;
@@ -63,20 +64,8 @@ public class ModelConfig implements Serializable, Cloneable {
         return Collections.unmodifiableList(compartments);
     }
 
-    public void addCompartment(CompartmentConfig compartment) {
-        this.compartments.add(compartment);
-    }
-
-    public void addCompartment(int index, CompartmentConfig compartment) {
-        this.compartments.add(index, compartment);
-    }
-
-    public void removeCompartment(int index) {
-        this.compartments.remove(index);
-    }
-
-    public void clearCompartments() {
-        this.compartments.clear();
+    public void setCompartments(List<CompartmentConfig> compartments) {
+        this.compartments = compartments;
     }
 
     public String getName() {
@@ -101,5 +90,19 @@ public class ModelConfig implements Serializable, Cloneable {
 
     public void setDeath(double death) {
         this.death = death;
+    }
+
+
+    public static ModelConfig getDefault() {
+        return new ModelConfig(
+                Arrays.asList(
+                        new CompartmentConfig(0.06, "S", "#00ff00"),
+                        new CompartmentConfig(0.04, "I", "#ff0000"),
+                        new CompartmentConfig(0, "R", "#0000ff")
+                ),
+                "SIR",
+                0,
+                0
+        );
     }
 }

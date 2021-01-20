@@ -10,7 +10,7 @@ public class SimulationConfig implements Cloneable {
     /**
      * Les modèles épidémiques
      */
-    private ArrayList<ModelConfig> models;
+    private List<ModelConfig> models;
     /**
      * L'index du modèle sélectionné
      */
@@ -97,7 +97,7 @@ public class SimulationConfig implements Cloneable {
         this.socialDistancingFactor = 0;
         this.vaccination = new SimulationRuleConfig();
     }
-    SimulationConfig(ArrayList<ModelConfig> models, int populationSize, double initialInfectious, double infectionRadius,
+    SimulationConfig(List<ModelConfig> models, int populationSize, double initialInfectious, double infectionRadius,
                      boolean enableCenterZone, boolean enableMultiZone, double centerZoneEnterProb, double centerZoneExitProb,
                      double multiZoneTravelProb, SimulationRuleConfig confinement, SimulationRuleConfig maskWear,
                      double maskWearEfficacity, SimulationRuleConfig quarantine, SimulationRuleConfig socialDistancing,
@@ -170,6 +170,11 @@ public class SimulationConfig implements Cloneable {
 
     public void addModel(ModelConfig model) {
         this.models.add(model);
+    }
+
+    public void removeModel(int modelId) {
+        models.remove(modelId);
+        selectedModelId = models.isEmpty() ? 0 : selectedModelId % models.size();
     }
 
     public void clearModels() {
@@ -313,33 +318,33 @@ public class SimulationConfig implements Cloneable {
         return new SimulationConfig(
                 new ArrayList<>(Arrays.asList(
                         new ModelConfig(
-                                new ArrayList<>(Arrays.asList(
+                                Arrays.asList(
                                         new CompartmentConfig(0.06, "S", "#00ff00"),
                                         new CompartmentConfig(0.04, "I", "#ff0000"),
                                         new CompartmentConfig(0, "R", "#0000ff")
-                                )),
+                                ),
                                 "SIR",
                                 0,
                                 0
                         ),
                         new ModelConfig(
-                                new ArrayList<>(Arrays.asList(
+                                Arrays.asList(
                                         new CompartmentConfig(0.06, "S", "#00ff00"),
                                         new CompartmentConfig(0.25, "E", "#ff7f00"),
                                         new CompartmentConfig(0.04, "I", "#ff0000"),
                                         new CompartmentConfig(0, "R", "#0000ff")
-                                )),
+                                ),
                                 "SEIR",
                                 0,
                                 0
                         ),
                         new ModelConfig(
-                                new ArrayList<>(Arrays.asList(
+                                Arrays.asList(
                                         new CompartmentConfig(0.06, "S", "#00ff00"),
                                         new CompartmentConfig(0.25, "E", "#ff7f00"),
                                         new CompartmentConfig(0.04, "I", "#ff0000"),
                                         new CompartmentConfig(0, "R", "#0000ff")
-                                )),
+                                ),
                                 "SEIR evolutive",
                                 0.01,
                                 0.01

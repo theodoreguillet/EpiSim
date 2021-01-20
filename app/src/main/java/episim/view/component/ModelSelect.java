@@ -1,8 +1,11 @@
 package episim.view.component;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -68,6 +71,10 @@ public class ModelSelect implements Initializable {
         toggle.setToggleGroup(group);
     }
 
+    /**
+     * Retourne le {@code Toggle} sous-jacent
+     * @return Le {@code Toggle} sous-jacent
+     */
     public Toggle getToggle() {
         return toggle;
     }
@@ -78,6 +85,38 @@ public class ModelSelect implements Initializable {
      */
     public void setName(String name) {
         toggle.setText(name);
+    }
+
+    /**
+     * Définit si le boutton d'édition doit être affiché ou non
+     * @param visible Visibilité du boutton
+     */
+    public void setEditButtonVisible(boolean visible) {
+        editBtn.setVisible(visible);
+    }
+
+    /**
+     * Définit si le boutton de suppression doit être affiché ou non
+     * @param visible Visibilité du boutton
+     */
+    public void setRemoveButtonVisible(boolean visible) {
+        removeBtn.setVisible(visible);
+    }
+
+    /**
+     * L'action du bouton d'édition qui est invoquée lorsque le bouton est activé.
+     * @return La propriété d'action du bouton d'édition.
+     */
+    public ObjectProperty<EventHandler<ActionEvent>> onEditActionProperty() {
+        return editBtn.onActionProperty();
+    }
+
+    /**
+     * L'action du bouton de suppression qui est invoquée lorsque le bouton est activé.
+     * @return La propriété d'action du bouton de suppression.
+     */
+    public ObjectProperty<EventHandler<ActionEvent>> onRemoveActionProperty() {
+        return removeBtn.onActionProperty();
     }
 
     private void displayEdit(boolean visible) {

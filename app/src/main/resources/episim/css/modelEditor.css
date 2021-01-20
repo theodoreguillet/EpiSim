@@ -1,0 +1,17 @@
+.text-field > .right-button > .right-button-graphic {
+    -fx-shape: none;
+
+    -fx-padding: 0;
+    -fx-background-color: none;
+}
+
+.text-field > .right-button{
+    -fx-cursor: default;
+
+    -fx-background-insets: none;
+    -fx-background-color: none;
+}
+
+.text-field > .right-button:hover > .right-button-graphic {
+    -fx-background-color: none;
+}

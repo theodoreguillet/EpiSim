@@ -2,6 +2,7 @@ package episim.view;
 
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
+import episim.util.StringDoubleConverter;
 import episim.view.component.ModelChart;
 import javafx.animation.AnimationTimer;
 import javafx.collections.ListChangeListener;
@@ -35,6 +36,8 @@ public class SimulationView implements FxmlView<SimulationViewModel>, Initializa
     private LineChart<Number, Number> simulationChart;
     @FXML
     private ModelChart simulationChartController;
+    @FXML
+    private VBox simulationPopContainer;
     @FXML
     private Pane simulationCanvasContainer;
     @FXML
@@ -104,6 +107,7 @@ public class SimulationView implements FxmlView<SimulationViewModel>, Initializa
 
         viewModel.simulationChart().addListener((ListChangeListener.Change<? extends ModelChart.Chart> c) -> {
             simulationChartController.dataProperty().setAll(viewModel.simulationChart());
+            updateSimlationPop();
         });
         simulationChartController.dataProperty().setAll(viewModel.simulationChart());
 
@@ -201,5 +205,20 @@ public class SimulationView implements FxmlView<SimulationViewModel>, Initializa
     private void fillCircle(GraphicsContext ctx, Point2D center, double radius, Color color) {
         ctx.setFill(color);
         ctx.fillOval(center.getX() - radius/2, center.getY() - radius/2, radius, radius);
+    }
+
+    private void updateSimlationPop() {
+        simulationPopContainer.getChildren().clear();
+        for(var chart : viewModel.simulationChart()) {
+            String value = new StringDoubleConverter().toString(chart.getYdata().get(chart.getYdata().size() - 1));
+            Text text = new Text(chart.getName() + "\t" + value);
+            String rgbColor = String.format("%d, %d, %d",
+                    (int) (chart.getColor().getRed() * 255),
+                    (int) (chart.getColor().getGreen() * 255),
+                    (int) (chart.getColor().getBlue() * 255)
+            );
+            text.setStyle(text.getStyle() + "-fx-fill: rgba(" + rgbColor + ", 1);");
+            simulationPopContainer.getChildren().add(text);
+        }
     }
 }

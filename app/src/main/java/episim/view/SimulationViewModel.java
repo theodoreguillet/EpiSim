@@ -14,6 +14,7 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +49,7 @@ public class SimulationViewModel implements ViewModel {
     }
 
     public static final String STOP_ANNIMATION = "STOP_ANNIMATION";
+    public static final String SAVE = "SAVE";
 
     @InjectScope
     private MainScope mainScope;
@@ -88,6 +90,9 @@ public class SimulationViewModel implements ViewModel {
             publish(STOP_ANNIMATION);
             stopSimulation();
         });
+        mainScope.subscribe(MainScope.EXPORT_SIMULATION, (key, payload) -> {
+            publish(SAVE);
+        });
 
         simulation.start();
         var state = simulation.getState();
@@ -102,8 +107,9 @@ public class SimulationViewModel implements ViewModel {
         mainScope.publish(MainScope.MAIN_CONFIG);
     }
 
-    public void saveSimulation() {
-        //
+    public void saveSimulation(File file) {
+        var state = simulation.getState();
+        state.stats.save(file);
     }
 
     public void updateSimulation() {

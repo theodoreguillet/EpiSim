@@ -67,7 +67,7 @@ public class MainViewModel implements ViewModel {
     public void resumeSimulation() {
         simulationPaused.set(false);
     }
-    public void exportSimulation(File file) {
-
+    public void exportSimulation() {
+        mainScope.publish(MainScope.EXPORT_SIMULATION);
     }
 }

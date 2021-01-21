@@ -11,6 +11,7 @@ public class MainScope implements Scope {
     public static final String SIMULATION = "SIMULATION";
     public static final String MAIN_CONFIG = "MAIN_CONFIG";
     public static final String STOP_SIMULATION = "STOP_SIMULATION";
+    public static final String EXPORT_SIMULATION = "EXPORT_SIMULATION";
 
     private final ObjectProperty<SimulationConfig> simulationConfig =
             new SimpleObjectProperty<>(SimulationConfig.getDefault());

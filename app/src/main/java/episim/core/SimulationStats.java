@@ -1,7 +1,12 @@
 package episim.core;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SimulationStats {
     public final List<SimulationStatsPoint> points;
@@ -14,7 +19,21 @@ public class SimulationStats {
         this.totalPopulation = totalPopulation;
     }
 
-    public void save(String path) {
-        // TODO Write csv
+    public void save(File file) {
+        try {
+            final String del = ",";
+            final String line = "\n";
+            var outputStream = new FileOutputStream(file);
+            outputStream.write(
+                    points.stream().map(
+                            p ->p.time + del +
+                                    p.populations.stream().map(Object::toString).collect(Collectors.joining(del))
+                    ).collect(Collectors.joining(line)).getBytes()
+            );
+            outputStream.close();
+        } catch (IOException err) {
+            // TODO: Report error to user
+            err.printStackTrace(System.err);
+        }
     }
 }

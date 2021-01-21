@@ -2,6 +2,7 @@ package episim.view;
 
 import de.saxsys.mvvmfx.FxmlView;
 import de.saxsys.mvvmfx.InjectViewModel;
+import episim.App;
 import episim.util.StringDoubleConverter;
 import episim.view.component.ModelChart;
 import javafx.animation.AnimationTimer;
@@ -19,6 +20,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Affine;
+import javafx.stage.FileChooser;
 import jfxtras.styles.jmetro.MDL2IconFont;
 
 import java.net.URL;
@@ -70,13 +72,22 @@ public class SimulationView implements FxmlView<SimulationViewModel>, Initializa
     }
 
     @FXML void saveSimulation() {
-        viewModel.saveSimulation();
+        var fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().addAll(
+                new FileChooser.ExtensionFilter("Fichier csv", "*.csv")
+        );
+        fileChooser.setTitle("Exporter en CSV");
+        var file = fileChooser.showSaveDialog(App.getPrimaryStage());
+        viewModel.saveSimulation(file);
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         viewModel.subscribe(SimulationViewModel.STOP_ANNIMATION, (key, payload) -> {
             timer.stop();
+        });
+        viewModel.subscribe(SimulationViewModel.SAVE, (key, payload) -> {
+            saveSimulation();
         });
 
         simulationCanvas.heightProperty().bind(simulationCanvasContainer.heightProperty());

@@ -80,7 +80,7 @@ public class MainView implements FxmlView<MainViewModel>, Initializable {
     }
     @FXML
     private void exportSimulation() {
-        //
+        viewModel.exportSimulation();
     }
 
     @Override

@@ -75,6 +75,10 @@ public class SimulationView implements FxmlView<SimulationViewModel>, Initializa
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        viewModel.subscribe(SimulationViewModel.STOP_ANNIMATION, (key, payload) -> {
+            timer.stop();
+        });
+
         simulationCanvas.heightProperty().bind(simulationCanvasContainer.heightProperty());
         simulationCanvas.widthProperty().bind(simulationCanvasContainer.widthProperty());
         simulationCanvas.heightProperty().addListener((observable, oldValue, newValue) -> {

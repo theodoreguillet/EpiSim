@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * Configuration de la simulation d'épidémie
  */
-public class SimulationConfig implements Cloneable {
+public class SimulationConfig implements Serializable, Cloneable {
     /**
      * Les modèles épidémiques
      */
@@ -122,21 +122,19 @@ public class SimulationConfig implements Cloneable {
         this.vaccination = vaccination;
     }
 
-    public static SimulationConfig load(String path) {
+    public static SimulationConfig load(File file) {
         try {
-            File file = new File(path);
             ObjectInputStream stream = new ObjectInputStream(new FileInputStream(file));
             return (SimulationConfig)stream.readObject();
-        } catch (Exception err) {
+        } catch (IOException | ClassNotFoundException err) {
             // TODO: Report error to user
             err.printStackTrace(System.err);
         }
         return null;
     }
 
-    public void save(String path) {
+    public void save(File file) {
         try {
-            File file = new File(path);
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
             oos.writeObject(this);
         } catch (IOException err) {

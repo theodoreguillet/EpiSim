@@ -47,8 +47,10 @@ public class SimulationViewModel implements ViewModel {
         public ArrayList<Rectangle2D> rects() { return rects; }
     }
 
+    public static final String STOP_ANNIMATION = "STOP_ANNIMATION";
+
     @InjectScope
-    private ConfigurationScope configScope;
+    private MainScope mainScope;
 
     private Simulation simulation;
 
@@ -63,7 +65,7 @@ public class SimulationViewModel implements ViewModel {
     private final ObservableList<ModelChart.Chart> simulationChart = FXCollections.observableArrayList();
 
     public void initialize() {
-        simulation = new Simulation(configScope.simulationConfig());
+        simulation = new Simulation(mainScope.getSimulationConfig());
 
         points = new ArrayList<>();
         zones = new ArrayList<>();
@@ -80,6 +82,12 @@ public class SimulationViewModel implements ViewModel {
                 simulation.resume();
             }
         });
+        mainScope.simulationPaused().bindBidirectional(simulationPaused);
+
+        mainScope.subscribe(MainScope.STOP_SIMULATION, (key, payload) -> {
+            publish(STOP_ANNIMATION);
+            stopSimulation();
+        });
 
         simulation.start();
         var state = simulation.getState();
@@ -91,7 +99,7 @@ public class SimulationViewModel implements ViewModel {
 
     public void stopSimulation() {
         simulation.stop();
-        configScope.publish(ConfigurationScope.MAIN_CONFIG);
+        mainScope.publish(MainScope.MAIN_CONFIG);
     }
 
     public void saveSimulation() {
@@ -165,7 +173,7 @@ public class SimulationViewModel implements ViewModel {
                     zoneSize, zoneSize
             );
             ArrayList<Rectangle2D> rects = new ArrayList<>();
-            if(configScope.simulationConfig().isEnableCenterZone()) {
+            if(mainScope.getSimulationConfig().isEnableCenterZone()) {
                 int centerSize = Simulation.ZONE_CENTER_SIZE;
                 int centerX = Simulation.ZONE_CENTER_X;
                 int centerY = Simulation.ZONE_CENTER_Y;
@@ -203,7 +211,7 @@ public class SimulationViewModel implements ViewModel {
                         zone.rects.get(0).contains(new Point2D(ind.posX, ind.posY));
                 double x = zone.bounds().getMinX() + ind.posX;
                 double y = zone.bounds().getMinY() + ind.posY;
-                CompartmentConfig comp = configScope.simulationConfig().getSelectedModel().getCompartments().get(ind.compartmentId);
+                CompartmentConfig comp = mainScope.getSimulationConfig().getSelectedModel().getCompartments().get(ind.compartmentId);
                 points.add(getSimulationPoint(ind.compartmentId, x, y, !isQuarantine && !inCenterZone));
             }
         }
@@ -226,18 +234,18 @@ public class SimulationViewModel implements ViewModel {
     }
 
     private Point getSimulationPoint(int compartmentId, double x, double y, boolean allowEmit) {
-        CompartmentConfig comp = configScope.simulationConfig().getSelectedModel().getCompartments().get(compartmentId);
+        CompartmentConfig comp = mainScope.getSimulationConfig().getSelectedModel().getCompartments().get(compartmentId);
         return new Point(
                 new Point2D(x, y),
                 Color.valueOf(comp.getColor()),
                 allowEmit && comp.getName().equals(CompartmentConfig.INFECTIOUS)
-                        ? configScope.simulationConfig().getInfectionRadius() : 0
+                        ? mainScope.getSimulationConfig().getInfectionRadius() : 0
         );
     }
 
     private void updateSimulationChart(SimulationState state) {
         ArrayList<ModelChart.Chart> charts = new ArrayList<>();
-        var comps = configScope.simulationConfig().getSelectedModel().getCompartments();
+        var comps = mainScope.getSimulationConfig().getSelectedModel().getCompartments();
         for(int i = 0; i < comps.size(); i++) {
             var comp = comps.get(i);
             ArrayList<Double> xdata = new ArrayList<>(state.stats.points.size());

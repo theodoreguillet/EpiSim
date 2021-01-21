@@ -6,16 +6,12 @@ import episim.core.CompartmentConfig;
 import episim.core.ModelChartGenerator;
 import episim.core.ModelConfig;
 import episim.view.component.ModelChart;
-import episim.view.component.ModelComp;
 import episim.view.popup.ModelEditorViewPopup;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
-import javafx.scene.chart.XYChart;
 
 import java.util.*;
 
@@ -47,7 +43,7 @@ public class HomeViewModel implements ViewModel {
     public static final String SIMULATION_CENTER = "Centre ville";
 
     @InjectScope
-    private ConfigurationScope configScope;
+    private MainScope mainScope;
 
     private final ObservableList<String> models = FXCollections.observableArrayList();
     private final IntegerProperty selectedModelId = new SimpleIntegerProperty();
@@ -91,19 +87,23 @@ public class HomeViewModel implements ViewModel {
 
         ModelEditorViewPopup.onValidateProperty().set(config -> {
             if(config != null) {
-                if(!configScope.simulationConfig().getModels().contains(config)) {
-                    configScope.simulationConfig().addModel(config);
+                if(!mainScope.getSimulationConfig().getModels().contains(config)) {
+                    mainScope.getSimulationConfig().addModel(config);
                 }
                 loadConfig();
             }
         });
 
+        mainScope.simulationConfig().addListener((observable, oldValue, newValue) -> {
+            loadConfig();
+            bindConfig();
+        });
         loadConfig();
         bindConfig();
     }
 
     public void startSimulation() {
-        configScope.publish(ConfigurationScope.SIMULATION);
+        mainScope.publish(MainScope.SIMULATION);
     }
 
     public void editModel(int modelId) {
@@ -115,9 +115,9 @@ public class HomeViewModel implements ViewModel {
     }
 
     public void removeModel(int modelId) {
-        if(configScope.simulationConfig().getModels().size() > 1) {
+        if(mainScope.getSimulationConfig().getModels().size() > 1) {
             // Il doit y avoir toujours au moins un modèle
-            configScope.simulationConfig().removeModel(modelId);
+            mainScope.getSimulationConfig().removeModel(modelId);
             loadConfig();
         }
     }
@@ -205,7 +205,7 @@ public class HomeViewModel implements ViewModel {
     }
 
     private ModelConfig getModelConfig(int modelId) {
-        return configScope.simulationConfig().getModels().get(modelId);
+        return mainScope.getSimulationConfig().getModels().get(modelId);
     }
     private CompartmentConfig getCompConfig(int modelId, int compId) {
         return getModelConfig(modelId).getCompartments().get(compId);
@@ -217,27 +217,27 @@ public class HomeViewModel implements ViewModel {
     private void bindConfig() {
         bindModels();
         selectedModelId.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().setSelectedModelId(newValue.intValue());
+            mainScope.getSimulationConfig().setSelectedModelId(newValue.intValue());
             updateChart();
         });
         popSize.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().setPopulationSize(newValue.intValue());
+            mainScope.getSimulationConfig().setPopulationSize(newValue.intValue());
             updateChart();
         });
         infecPct.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().setInitialInfectious(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().setInitialInfectious(newValue.doubleValue() / 100.0);
             updateChart();
         });
         infecRadius.addListener((observable, oldValue, newValue) -> {
             if(newValue.doubleValue() < 1) {
                 infecRadius.set(1);
             } else {
-                configScope.simulationConfig().setInfectionRadius(newValue.doubleValue());
+                mainScope.getSimulationConfig().setInfectionRadius(newValue.doubleValue());
                 updateChart();
             }
         });
         simulationMode.addListener((observable, oldValue, newValue) -> {
-            var config = configScope.simulationConfig();
+            var config = mainScope.getSimulationConfig();
             switch (newValue) {
                 case SIMULATION_SIMPLE -> {
                     config.setEnableCenterZone(false);
@@ -254,54 +254,54 @@ public class HomeViewModel implements ViewModel {
             }
         });
         centerZoneEnterProb.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().setCenterZoneEnterProb(newValue.doubleValue() / 100.0 * 24.0);
+            mainScope.getSimulationConfig().setCenterZoneEnterProb(newValue.doubleValue() / 100.0 * 24.0);
         });
         centerZoneExitProb.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().setCenterZoneExitProb(newValue.doubleValue() / 100.0 * 24.0);
+            mainScope.getSimulationConfig().setCenterZoneExitProb(newValue.doubleValue() / 100.0 * 24.0);
         });
         multiZoneTravelProb.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().setMultiZoneTravelProb(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().setMultiZoneTravelProb(newValue.doubleValue() / 100.0);
         });
 
         confinementRespect.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getConfinement().setRespectProb(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().getConfinement().setRespectProb(newValue.doubleValue() / 100.0);
         });
         confinementDelay.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getConfinement().setDelay(newValue.doubleValue());
+            mainScope.getSimulationConfig().getConfinement().setDelay(newValue.doubleValue());
         });
 
         maskWearEfficacity.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().setMaskWearEfficacity(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().setMaskWearEfficacity(newValue.doubleValue() / 100.0);
         });
         maskWearRespect.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getMaskWear().setRespectProb(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().getMaskWear().setRespectProb(newValue.doubleValue() / 100.0);
         });
         maskWearDelay.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getMaskWear().setDelay(newValue.doubleValue());
+            mainScope.getSimulationConfig().getMaskWear().setDelay(newValue.doubleValue());
         });
 
         quarantineRespect.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getQuarantine().setRespectProb(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().getQuarantine().setRespectProb(newValue.doubleValue() / 100.0);
         });
         quarantineDelay.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getQuarantine().setDelay(newValue.doubleValue());
+            mainScope.getSimulationConfig().getQuarantine().setDelay(newValue.doubleValue());
         });
 
         socialDistancingPct.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().setSocialDistancingFactor(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().setSocialDistancingFactor(newValue.doubleValue() / 100.0);
         });
         socialDistancingRespect.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getSocialDistancing().setRespectProb(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().getSocialDistancing().setRespectProb(newValue.doubleValue() / 100.0);
         });
         socialDistancingDelay.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getSocialDistancing().setDelay(newValue.doubleValue());
+            mainScope.getSimulationConfig().getSocialDistancing().setDelay(newValue.doubleValue());
         });
 
         vaccinationRespect.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getVaccination().setRespectProb(newValue.doubleValue() / 100.0);
+            mainScope.getSimulationConfig().getVaccination().setRespectProb(newValue.doubleValue() / 100.0);
         });
         vaccinationDelay.addListener((observable, oldValue, newValue) -> {
-            configScope.simulationConfig().getVaccination().setDelay(newValue.doubleValue());
+            mainScope.getSimulationConfig().getVaccination().setDelay(newValue.doubleValue());
         });
     }
     private void bindModels() {
@@ -342,7 +342,7 @@ public class HomeViewModel implements ViewModel {
      * Charge les attributs de {@code SimulationConfig} dans {@code HomeViewModel}
      */
     private void loadConfig() {
-        var config = configScope.simulationConfig();
+        var config = mainScope.getSimulationConfig();
 
         selectedModelId.set(config.getSelectedModelId());
 
@@ -384,7 +384,7 @@ public class HomeViewModel implements ViewModel {
         updateChart();
     }
     private void loadModelConfig(int modelId) {
-        var config = configScope.simulationConfig();
+        var config = mainScope.getSimulationConfig();
         var selectedModel = config.getModels().get(modelId);
         modelComps.clear();
         for(var comp : selectedModel.getCompartments()) {

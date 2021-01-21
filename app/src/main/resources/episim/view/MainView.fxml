@@ -1,32 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.layout.BorderPane?>
 
-<BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="episim.view.MainView"
-            fx:id="borderPane"
-            prefHeight="600.0" prefWidth="900.0">
+<BorderPane fx:id="borderPane" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="episim.view.MainView">
     <top>
         <MenuBar BorderPane.alignment="CENTER">
             <menus>
-                <Menu mnemonicParsing="false" text="File">
+                <Menu mnemonicParsing="false" text="Fichier">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Close" />
+                        <MenuItem fx:id="loadConfigItem" mnemonicParsing="false" onAction="#loadConfig" text="Charger la configuration" />
+                  <MenuItem mnemonicParsing="false" onAction="#saveConfig" text="Enregistrer la configuration" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem mnemonicParsing="false" onAction="#exit" text="Quitter" />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Edit">
+                <Menu mnemonicParsing="false" text="Simulation">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="Delete" />
+                        <MenuItem fx:id="simulationStartItem" mnemonicParsing="false" onAction="#startSimulation" text="Démarrer" />
+                  <MenuItem fx:id="simulationStopItem" mnemonicParsing="false" onAction="#stopSimulation" text="Arrêter" visible="false" />
+                  <MenuItem fx:id="simulationPauseItem" disable="true" mnemonicParsing="false" onAction="#pauseSimulation" text="Mettre en pause" />
+                  <MenuItem fx:id="simulationResumeItem" disable="true" mnemonicParsing="false" onAction="#resumeSimulation" text="Reprendre" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                  <MenuItem fx:id="simulationExportItem" mnemonicParsing="false" onAction="#exportSimulation" text="Exporter" />
                     </items>
                 </Menu>
-                <Menu mnemonicParsing="false" text="Help">
+                <Menu mnemonicParsing="false" text="Aide">
                     <items>
-                        <MenuItem mnemonicParsing="false" text="About" />
+                        <MenuItem mnemonicParsing="false" text="À propos" />
                     </items>
                 </Menu>
             </menus>

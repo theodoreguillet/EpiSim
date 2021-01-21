@@ -1,11 +1,11 @@
 package episim.core;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * Configuration d'une règle sanitaire de la simulation
  */
-public class SimulationRuleConfig implements Cloneable {
+public class SimulationRuleConfig implements Serializable, Cloneable {
     /**
      * La probabilité qu'un individu respecte la règle par jour
      */

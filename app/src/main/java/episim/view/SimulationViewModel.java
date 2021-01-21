@@ -109,7 +109,7 @@ public class SimulationViewModel implements ViewModel {
 
     public void saveSimulation(File file) {
         var state = simulation.getState();
-        state.stats.save(file);
+        state.stats.save(file, mainScope.getSimulationConfig().getSelectedModel());
     }
 
     public void updateSimulation() {

@@ -19,11 +19,17 @@ public class SimulationStats {
         this.totalPopulation = totalPopulation;
     }
 
-    public void save(File file) {
+    public void save(File file, ModelConfig config) {
         try {
             final String del = ",";
             final String line = "\n";
+            final String xlabel = "temps";
             var outputStream = new FileOutputStream(file);
+            outputStream.write((
+                    xlabel + del +
+                    config.getCompartments().stream().map(CompartmentConfig::getName).collect(Collectors.joining(del)) +
+                    line
+            ).getBytes());
             outputStream.write(
                     points.stream().map(
                             p ->p.time + del +

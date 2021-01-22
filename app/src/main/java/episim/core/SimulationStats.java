@@ -8,6 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Statistiques de la simulation
+ */
 public class SimulationStats {
     public final List<SimulationStatsPoint> points;
     public final double elapsedTime;

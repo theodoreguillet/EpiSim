@@ -3,6 +3,9 @@ package episim.core;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Un point des statistiques de la simulation
+ */
 public class SimulationStatsPoint {
     public final double time;
     public final List<Double> populations;

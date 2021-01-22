@@ -4,7 +4,7 @@ Simulateur de dynamique épidémique permettant de concevoir, paramétrer et app
 
 | Menu principal | Simulation |
 |:-------------------------:|:-------------------------:|
-|![Menu principal](images/home.png)|![Simulation](images/simulation.png)|
+|![Menu principal](docs/images/home.png)|![Simulation](docs/images/simulation.png)|
 
 ## Exécuter à partir des sources
 ```

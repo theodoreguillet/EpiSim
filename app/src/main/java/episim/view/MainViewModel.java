@@ -12,7 +12,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import java.io.File;
 
 /**
- * Modèle de la vue principale
+ * Modèle de la vue {@link MainView principale}
  */
 @ScopeProvider(scopes = {MainScope.class})
 public class MainViewModel implements ViewModel {

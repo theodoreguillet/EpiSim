@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
+/**
+ * Génère la courbe épidémique d'un modèle
+ */
 public class ModelChartGenerator{
 
     public static class CompData{

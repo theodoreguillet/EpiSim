@@ -16,9 +16,11 @@ import javafx.scene.shape.Line;
 import jfxtras.styles.jmetro.MDL2IconFont;
 
 import java.net.URL;
-import java.util.Locale;
 import java.util.ResourceBundle;
 
+/**
+ * Vue de la fênetre d'édition d'un modèle
+ */
 public class ModelEditorView implements FxmlView<ModelEditorViewModel>, Initializable {
     @InjectViewModel
     ModelEditorViewModel viewModel;

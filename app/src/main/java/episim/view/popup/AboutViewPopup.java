@@ -5,7 +5,10 @@ import episim.App;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-public class AboutViewPopup {
+/**
+ * Popup de la vue {@link AboutView A propos}
+ */
+public abstract class AboutViewPopup {
     private static Stage stage;
 
     public static void open() {

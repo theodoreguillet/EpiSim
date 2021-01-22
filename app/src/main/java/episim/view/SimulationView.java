@@ -26,6 +26,9 @@ import jfxtras.styles.jmetro.MDL2IconFont;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Vue de la simulation
+ */
 public class SimulationView implements FxmlView<SimulationViewModel>, Initializable {
     @InjectViewModel
     private SimulationViewModel viewModel;

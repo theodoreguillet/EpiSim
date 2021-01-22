@@ -13,6 +13,9 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 
+/**
+ * Popup de la vue {@link ModelEditorView}
+ */
 public abstract class ModelEditorViewPopup {
     public interface ValidateHandler {
         void handle(ModelConfig config);

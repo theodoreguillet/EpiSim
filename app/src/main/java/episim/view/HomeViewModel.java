@@ -16,7 +16,7 @@ import javafx.scene.paint.Color;
 import java.util.*;
 
 /**
- * Modèle de la vue de l'accueil
+ * Modèle de la vue de {@link HomeView l'accueil}
  */
 public class HomeViewModel implements ViewModel {
     public static class ModelCompProperty {

@@ -4,6 +4,7 @@ import de.saxsys.mvvmfx.InjectScope;
 import de.saxsys.mvvmfx.ViewModel;
 import episim.core.*;
 import episim.view.component.ModelChart;
+import episim.view.popup.ModelEditorView;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -18,6 +19,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Modèle de la vue {@link SimulationView simulation}
+ */
 public class SimulationViewModel implements ViewModel {
     public static class Point {
         private final Point2D pos;

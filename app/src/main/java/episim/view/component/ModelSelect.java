@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Composant contenant le bouton de sélection d'un modèle avec l'option d'édition et de suppression
+ */
 public class ModelSelect implements Initializable {
     /**
      * Crée un {@code ModelSelect}

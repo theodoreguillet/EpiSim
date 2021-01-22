@@ -6,15 +6,15 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 
 /**
- * Encapsule un composant {@ref Spinner} de javafx
+ * Encapsule un composant {@code Spinner} de javafx
  */
 public class SpinnerWrapper {
     private final Spinner<Double> spinner;
     private final DoubleProperty valueProperty = new SimpleDoubleProperty();
 
     /**
-     * Encapsule un composant {@ref Spinner} de javafx
-     * @param spinner Le {@ref Spinner}
+     * Encapsule un composant {@code Spinner} de javafx
+     * @param spinner Le {@code Spinner}
      * @param min La valeur minimum autorisée
      * @param max La valeur maximum autorisée
      * @param value La valeur initiale

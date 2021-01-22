@@ -7,6 +7,9 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+/**
+ * Contexte principal partagé entre les vues contenues dans {@link MainView}
+ */
 public class MainScope implements Scope {
     public static final String SIMULATION = "SIMULATION";
     public static final String MAIN_CONFIG = "MAIN_CONFIG";

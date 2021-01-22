@@ -38,6 +38,9 @@ public class MathUtils {
 
     /**
      * Calcule le modulo x % y pour des nombres flottant de la même manière que {@code Math.floorMod}
+     * @param x x
+     * @param y y
+     * @return x % y
      */
     public static double floatMod(double x, double y){
         return (x - Math.floor(x/y) * y);
@@ -58,6 +61,11 @@ public class MathUtils {
 
     /**
      * Retourne le carré de la distance entre (x1, y1) et (x2, y2)
+     * @param x1 x1
+     * @param y1 y1
+     * @param x2 x2
+     * @param y2 y2
+     * @return Le carré de la distance entre (x1, y1) et (x2, y2)
      */
     public static double dst2(double x1, double y1, double x2, double y2) {
         double dx = x1 - x2;

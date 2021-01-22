@@ -71,7 +71,7 @@ public class SimulationViewModel implements ViewModel {
 
         points = new ArrayList<>();
         zones = new ArrayList<>();
-        quarantineEnabled = true;
+        quarantineEnabled = mainScope.getSimulationConfig().getQuarantine().getRespectProb() > 0;
         worldBounds = Rectangle2D.EMPTY;
 
         simulationSpeed.addListener((observable, oldValue, newValue) -> {
@@ -207,7 +207,8 @@ public class SimulationViewModel implements ViewModel {
 
     private void updateSimulationPoints(SimulationState state) {
         points = new ArrayList<>();
-        for(int i = 0; i < state.zones.size() + 1; i++) {
+        int nzones = quarantineEnabled ? state.zones.size() + 1 : state.zones.size();
+        for(int i = 0; i < nzones; i++) {
             boolean isQuarantine = i == state.zones.size();
             ZoneState zoneState = isQuarantine ? state.quarantine : state.zones.get(i);
             Zone zone = zones.get(i);

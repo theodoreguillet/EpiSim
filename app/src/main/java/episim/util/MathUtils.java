@@ -52,6 +52,9 @@ public class MathUtils {
      * @return Un angle compris entre -pi (exclus) et pi (inclus)
      */
     public static double angleMod(double angle) {
+        if(angle > -Math.PI && angle <= Math.PI) {
+            return angle;
+        }
         angle = floatMod(angle, 2 * Math.PI);
         if(angle > Math.PI) {
             angle = angle - (2 * Math.PI);

@@ -15,9 +15,6 @@ import jfxtras.styles.jmetro.Style;
  */
 public class App extends MvvmfxGuiceApplication {
     private static Stage primaryStage;
-    public String getGreeting() {
-        return "Hello World!";
-    }
 
     @Override
     public void startMvvmfx(Stage primaryStage) throws Exception {

@@ -82,6 +82,10 @@ public class MainView implements FxmlView<MainViewModel>, Initializable {
     private void exportSimulation() {
         viewModel.exportSimulation();
     }
+    @FXML
+    private void aboutUs() {
+        viewModel.showAboutUs();
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

@@ -5,6 +5,7 @@ import de.saxsys.mvvmfx.ScopeProvider;
 import de.saxsys.mvvmfx.ViewModel;
 import episim.App;
 import episim.core.SimulationConfig;
+import episim.view.popup.AboutViewPopup;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
@@ -69,5 +70,8 @@ public class MainViewModel implements ViewModel {
     }
     public void exportSimulation() {
         mainScope.publish(MainScope.EXPORT_SIMULATION);
+    }
+    public void showAboutUs() {
+        AboutViewPopup.open();
     }
 }

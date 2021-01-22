@@ -70,7 +70,9 @@ public class ModelEditorViewModel implements ViewModel {
         for(var comp : modelComps) {
             var property = new SimpleStringProperty(comp.getName());
             property.addListener((observable, oldValue, newValue) -> {
-                comp.setName(property.get());
+                if(!newValue.isBlank()) {
+                    comp.setName(property.get());
+                }
             });
             compartments.add(property);
         }

@@ -25,5 +25,5 @@ Génère les archives: \
 
 ## Références
 
-https://images.math.cnrs.fr/Modelisation-d-une-epidemie-partie-1.html
+https://images.math.cnrs.fr/Modelisation-d-une-epidemie-partie-1.html \
 https://prajwalsouza.github.io/Experiments/Epidemic-Simulation.html

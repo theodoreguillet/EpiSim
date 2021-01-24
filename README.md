@@ -8,15 +8,15 @@ Simulateur de dynamique épidémique permettant de concevoir, paramétrer et app
 
 ## Exécuter à partir des sources
 ```
-git clone https://github.com/watchtux/EpiSim/tree/master
-cd episim
+git clone https://github.com/watchtux/EpiSim.git
+cd EpiSim
 ./gradlew run
 ```
 
 ## Générer l'exécutable
 ```
-git clone https://github.com/watchtux/EpiSim/tree/master
-cd episim
+git clone https://github.com/watchtux/EpiSim.git
+cd EpiSim
 ./gradlew packageApp
 ```
 Génère les archives: \

@@ -13,15 +13,25 @@ cd EpiSim
 ./gradlew run
 ```
 
+## Exécuter les tests unitaires
+```
+./gradlew test
+```
+
 ## Générer l'exécutable
 ```
-git clone https://github.com/watchtux/EpiSim.git
-cd EpiSim
 ./gradlew packageApp
 ```
 Génère les archives: \
 `app/build/app-{version}-{platform}.zip` \
 `app/build/app-{version}-{platform}.tar.gz`
+
+## Générer la documentation
+```
+./gradlew javadoc
+```
+La documentation est consultable en ouvrant dans un navigateur: \
+`app/build/docs/javadoc/index.html`
 
 ## Références
 
